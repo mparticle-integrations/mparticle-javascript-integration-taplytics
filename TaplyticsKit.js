@@ -63,7 +63,7 @@
                 // testmode is run from your test file, when testing, your
                 // script will not be loaded, but rather the stubs you create in
                 // the test file will be used
-                if (!testMode) {
+                if (!testMode && !window.Taplytics) {
                     var taplyticsScript = document.createElement('script');
                     taplyticsScript.type = 'text/javascript';
                     taplyticsScript.async = true;
