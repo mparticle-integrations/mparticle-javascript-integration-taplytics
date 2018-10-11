@@ -148,7 +148,7 @@
             } 
 
             if (cookieDomain) {
-                src = src + (query ? '&' : '') + 'cookieDomain=' + cookieDomain;
+                query = query + (query ? '&' : '') + 'cookieDomain=' + cookieDomain;
             }
 
             var user_attributes = initUserAttributes;
