@@ -140,20 +140,21 @@
             var cookieDomain = settings.cookieDomain;
             var timeout = settings.timeout;
 
-            var src = 'https://js.taplytics.com/jssdk/' + token + '.min.js' + (cookieDomain || timeout || userAttributes) && '?';
+            var src = 'https://js.taplytics.com/jssdk/' + token + '.min.js';
+            var query = ''
 
             if (timeout) {
-                src = src + 'timeout=' + timeout;
+                query = query + 'timeout=' + timeout;
             } 
 
             if (cookieDomain) {
-                src = src + '&cookieDomain=' + cookieDomain;
+                src = src + (query ? '&' : '') + 'cookieDomain=' + cookieDomain;
             }
-            
-            const user_attributes = encodeURIComponent(JSON.stringify(initUserAttributes));
+
+            var user_attributes = initUserAttributes;
 
             if (initUserIdentities.length) {
-                var identity = userIdentities[0];
+                var identity = initUserIdentities[0];
                 var type = identity.Type;
                 var id = identity.Identity;
                 switch (type) {
@@ -166,7 +167,14 @@
                 }
             }
 
-            src = src + '&user_attributes'+ user_attributes;
+            userAttributes = encodeURIComponent(JSON.stringify(user_attributes));
+
+            query = query + (query ? '&' : '') + 'user_attributes' + user_attributes;
+
+            if (query) {
+                src = src + '?' + query
+            }
+
             return src;
         }
 
@@ -187,6 +195,17 @@
             }
         }
 
+        function mergeObjects(obj1, obj2) {
+            var obj = {};
+            for (var key in obj1) {
+                obj[key] = obj1[key];
+            }
+            for (var key in obj2) {
+                obj[key] = obj2[key];
+            }
+            return obj;
+        }
+
         // ****** Call your eCommerce logPurchase function here ****** //
         function logPurchaseEvent(event) {
             var reportEvent = false;
@@ -196,7 +215,7 @@
                     event.ProductAction.ProductList.forEach(function(product) {
                         // Details on the `product` object schema in the README
                         if (product.Attributes) {
-                            Taplytics.track(product.Name, parseFloat(product.TotalAmount), Object.assign(product.Attributes, product));
+                            Taplytics.track(product.Name, parseFloat(product.TotalAmount), mergeObjects(product.Attributes, product));
                         } else {
                             Taplytics.track(product.Name, parseFloat(product.TotalAmount), product)
                         }
@@ -261,10 +280,9 @@
         function setUserAttribute(key, value) {
             if (isInitialized) {
                 try {
-                    Taplytics.identify({
-                        [key]: value
-                    });
-
+                    var attributes = {};
+                    attributes[key] = value;
+                    Taplytics.identify(attributes);
                     return 'Successfully called setUserAttribute API on ' + name;
                 }
                 catch (e) {
