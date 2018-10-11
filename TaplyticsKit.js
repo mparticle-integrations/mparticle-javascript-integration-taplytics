@@ -301,11 +301,29 @@
             setUserAttribute(key, null);
         }
 
+        function onUserIdentified(user) {
+            if (isInitialized) {
+                var identities = user.getUserIdentities().userIdentities;
+                var attributes = {}
+                if (identities.customerid) {
+                    attributes.user_id = identities.customerid;
+                }
+                if (identities.email) {
+                    attributes.email = identities.email;
+                }
+                Taplytics.identify(attributes);
+            }
+            else {
+                return 'Can\'t call onUserIdentified on forwarder ' + name + ', not initialized';
+            }
+        }
+
         this.init = initForwarder;
         this.process = processEvent;
         this.setUserIdentity = setUserIdentity;
         this.setUserAttribute = setUserAttribute;
         this.removeUserAttribute = removeUserAttribute;
+        this.onUserIdentified = onUserIdentified;
     };
 
     if (!window || !window.mParticle || !window.mParticle.addForwarder) {
