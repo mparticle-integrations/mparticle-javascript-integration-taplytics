@@ -1,0 +1,12 @@
+{
+  "name": "integration-taplytics",
+  "description": "mParticle integration sdk for Taplytics",
+  "repository": "https://github.com/mparticle-integrations/mparticle-javascript-integration-taplytics/",
+  "devDependencies": {
+    "assert": "^1.4.1",
+    "blanket": "^1.1.7",
+    "mocha": "^2.3.2",
+    "should": "^7.1.0"
+  },
+  "dependencies": {}
+}
