@@ -135,10 +135,26 @@
             return 'Can\'t send to forwarder ' + name + ', not initialized. Event added to queue.';
         }
 
+        function isEmpty(obj) {
+            for (var prop in obj) {return false;}
+            return true;
+        }
+				
+        function mergeObjects(obj1, obj2) {
+            var obj = {};
+            for (var key in obj1) {
+                obj[key] = obj1[key];
+            }
+            for (var key in obj2) {
+                obj[key] = obj2[key];
+            }
+            return obj;
+        }
+
         function getTaplyticsSourceLink() {
             var token = settings.apiKey;
-            var cookieDomain = settings.cookieDomain;
-            var timeout = settings.timeout;
+            var cookieDomain = settings.taplyticsOptionCookieDomain;
+            var timeout = settings.taplyticsOptionTimeout;
 
             var src = 'https://js.taplytics.com/jssdk/' + token + '.min.js';
             var query = '';
@@ -151,25 +167,27 @@
                 query = query + (query ? '&' : '') + 'cookieDomain=' + cookieDomain;
             }
 
-            var user_attributes = initUserAttributes;
+            var user_attributes = initUserAttributes || {};
 
-            if (initUserIdentities.length) {
-                var identity = initUserIdentities[0];
-                var type = identity.Type;
-                var id = identity.Identity;
-                switch (type) {
-                    case 1:
-                        user_attributes['user_id'] = id;
-                        break;
-                    case 7:
-                        user_attributes['email'] = id;
-                        break;
+            if (!isEmpty(user_attributes)) {
+                if (initUserIdentities.length) {
+                    var identity = initUserIdentities[0];
+                    var type = identity.Type;
+                    var id = identity.Identity;
+                    switch (type) {
+                        case 1:
+                            user_attributes['user_id'] = id;
+                            break;
+                        case 7:
+                            user_attributes['email'] = id;
+                            break;
+                    }
                 }
+    
+                user_attributes = encodeURIComponent(JSON.stringify(user_attributes));
+    
+                query = query + (query ? '&' : '') + 'user_attributes' + user_attributes;
             }
-
-            userAttributes = encodeURIComponent(JSON.stringify(user_attributes));
-
-            query = query + (query ? '&' : '') + 'user_attributes' + user_attributes;
 
             if (query) {
                 src = src + '?' + query;
@@ -195,23 +213,13 @@
             }
         }
 
-        function mergeObjects(obj1, obj2) {
-            var obj = {};
-            for (var key in obj1) {
-                obj[key] = obj1[key];
-            }
-            for (var key in obj2) {
-                obj[key] = obj2[key];
-            }
-            return obj;
-        }
-
         // ****** Call your eCommerce logPurchase function here ****** //
         function logPurchaseEvent(event) {
             var reportEvent = false;
             // The products purchased will be on the array event.ProductAction.ProductList
             if (event.ProductAction.ProductList) {
                 try {
+									
                     event.ProductAction.ProductList.forEach(function(product) {
                         // Details on the `product` object schema in the README
                         if (product.Attributes) {
