@@ -143,10 +143,14 @@
         function mergeObjects(obj1, obj2) {
             var obj = {};
             for (var key in obj1) {
-                obj[key] = obj1[key];
+                if (obj1[key]) {
+                    obj[key] = obj1[key];
+                }
             }
             for (var key in obj2) {
-                obj[key] = obj2[key];
+                if (obj2[key]) {
+                    obj[key] = obj2[key];
+                }
             }
             return obj;
         }
