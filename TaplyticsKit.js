@@ -136,16 +136,16 @@
         }
 
         function getTaplyticsSourceLink() {
-            var token = settings.jsToken;
+            var token = settings.apiKey;
             var cookieDomain = settings.cookieDomain;
             var timeout = settings.timeout;
 
             var src = 'https://js.taplytics.com/jssdk/' + token + '.min.js';
-            var query = ''
+            var query = '';
 
             if (timeout) {
                 query = query + 'timeout=' + timeout;
-            } 
+            }
 
             if (cookieDomain) {
                 query = query + (query ? '&' : '') + 'cookieDomain=' + cookieDomain;
@@ -159,10 +159,10 @@
                 var id = identity.Identity;
                 switch (type) {
                     case 1:
-                        user_attributes["user_id"] = id;
+                        user_attributes['user_id'] = id;
                         break;
                     case 7:
-                        user_attributes["email"] = id;
+                        user_attributes['email'] = id;
                         break;
                 }
             }
@@ -172,7 +172,7 @@
             query = query + (query ? '&' : '') + 'user_attributes' + user_attributes;
 
             if (query) {
-                src = src + '?' + query
+                src = src + '?' + query;
             }
 
             return src;
@@ -217,7 +217,7 @@
                         if (product.Attributes) {
                             Taplytics.track(product.Name, parseFloat(product.TotalAmount), mergeObjects(product.Attributes, product));
                         } else {
-                            Taplytics.track(product.Name, parseFloat(product.TotalAmount), product)
+                            Taplytics.track(product.Name, parseFloat(product.TotalAmount), product);
                         }
                     });
                     return true;
@@ -304,7 +304,7 @@
         function onUserIdentified(user) {
             if (isInitialized) {
                 var identities = user.getUserIdentities().userIdentities;
-                var attributes = {}
+                var attributes = {};
                 if (identities.customerid) {
                     attributes.user_id = identities.customerid;
                 }
