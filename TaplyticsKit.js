@@ -246,7 +246,7 @@
         function logEvent(event) {
             try {
                 if (event.EventAttributes) {
-                    Taplytics.track(event.EventName, event.EventAttributes);
+                    Taplytics.track(event.EventName, null, event.EventAttributes);
                 }
                 else {
                     Taplytics.track(event.EventName);
@@ -322,7 +322,9 @@
                 if (identities.email) {
                     attributes.email = identities.email;
                 }
-                Taplytics.identify(attributes);
+                if (!isEmpty(attributes)) {
+                    Taplytics.identify(attributes);
+                }
             }
             else {
                 return 'Can\'t call onUserIdentified on forwarder ' + name + ', not initialized';
