@@ -173,23 +173,22 @@
 
             var user_attributes = initUserAttributes || {};
 
-            if (!isEmpty(user_attributes)) {
-                if (initUserIdentities.length) {
-                    var identity = initUserIdentities[0];
-                    var type = identity.Type;
-                    var id = identity.Identity;
-                    switch (type) {
-                        case 1:
-                            user_attributes['user_id'] = id;
-                            break;
-                        case 7:
-                            user_attributes['email'] = id;
-                            break;
-                    }
+            if (initUserIdentities.length) {
+                var identity = initUserIdentities[0];
+                var type = identity.Type;
+                var id = identity.Identity;
+                switch (type) {
+                    case 1:
+                        user_attributes['user_id'] = id;
+                        break;
+                    case 7:
+                        user_attributes['email'] = id;
+                        break;
                 }
-    
+            }
+
+            if (!isEmpty(user_attributes)) {
                 user_attributes = encodeURIComponent(JSON.stringify(user_attributes));
-    
                 query = query + (query ? '&' : '') + 'user_attributes' + user_attributes;
             }
 
