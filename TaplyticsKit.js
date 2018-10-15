@@ -77,7 +77,7 @@
                         // If your SDK queues its own methods, the following
                         // code block is not necessary and instances of
                         // eventQueue and isIniatialized can be removed
-                        if (clientSdk && eventQueue.length > 0) {
+                        if (window.Taplytics && eventQueue.length > 0) {
                             // Process any events that may have been queued up
                             // while forwarder was being initialized.
                             for (var i = 0; i < eventQueue.length; i++) {
