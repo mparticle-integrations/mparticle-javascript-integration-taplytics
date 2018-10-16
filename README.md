@@ -1,7 +1,15 @@
 # integration-taplytics
 Taplytics Javascript integration for mParticle
 
-#License
+# Installation
+
+Since Taplytics is an A/B Testing Platform, you might encounter bugs with flickering when using our code variables to change visual components. 
+
+To prevent this, you can install our Taplytics JS SDK directly at the top of your `<head>` tag by following the instructions here: https://github.com/taplytics/taplytics-js-sdk/blob/master/START.md. 
+
+The mParticle-Taplytics integration will automatically detect that you started Taplytics and will prevent any flickering of visual changes on your website!
+
+# License
 
 Copyright 2018 mParticle, Inc.
 
