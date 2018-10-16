@@ -258,7 +258,6 @@ describe('Taplytics Forwarder', function () {
             EventDataType: MessageType.PageEvent
         });
 
-        console.log(window.Taplytics);
         var event = window.Taplytics.events;
         
         event.length.should.equal(1);
