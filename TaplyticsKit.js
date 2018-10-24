@@ -386,25 +386,12 @@
             }
         }
 
-        /**
-         * Resets user state in Taplytics
-         * @returns {string}
-         */
-        function reset() {
-            if (isInitialized) {
-                Taplytics.reset();
-            } else {
-                return 'Can\'t call reset on forwarder ' + name + ', not initialized';
-            }
-        }
-
         this.init = initForwarder;
         this.process = processEvent;
         this.setUserIdentity = setUserIdentity;
         this.setUserAttribute = setUserAttribute;
         this.removeUserAttribute = removeUserAttribute;
         this.onUserIdentified = onUserIdentified;
-        this.reset = reset;
     };
 
     if (!window || !window.mParticle || !window.mParticle.addForwarder) {
