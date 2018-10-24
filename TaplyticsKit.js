@@ -124,7 +124,7 @@
          * @returns {boolean}
          */
         function isEmpty(obj) {
-            for (var prop in obj) {return false;}
+            for (var prop in obj) { return false; }
             return true;
         }
 
@@ -213,7 +213,7 @@
                 return true;
             }
             catch (e) {
-                return {error: e};
+                return { error: e };
             }
         }
 
@@ -239,7 +239,7 @@
                     return true;
                 }
                 catch (e) {
-                    return {error: e};
+                    return { error: e };
                 }
             }
 
@@ -262,20 +262,20 @@
                         if (event[key]) {
                             attributes[key] = event[key];
                         }
-					}
+                    }
 
-					if (!isEmpty(attributes)) {
+                    if (!isEmpty(attributes)) {
                         Taplytics.track(event.EventName, null, attributes);
-					}
+                    }
                     return true;
                 }
                 catch (e) {
-                    return {error: e};
+                    return { error: e };
                 }
             }
 
             return reportEvent;
-		}
+        }
 
         /**
          * Log Regular events
@@ -293,7 +293,7 @@
                 return true;
             }
             catch (e) {
-                return {error: e};
+                return { error: e };
             }
         }
 
@@ -391,12 +391,12 @@
          * @returns {string}
          */
         function reset() {
-			if (isInitialized) {
-				Taplytics.reset();
-			} else {
+            if (isInitialized) {
+                Taplytics.reset();
+            } else {
                 return 'Can\'t call reset on forwarder ' + name + ', not initialized';
-			}
-		}
+            }
+        }
 
         this.init = initForwarder;
         this.process = processEvent;
