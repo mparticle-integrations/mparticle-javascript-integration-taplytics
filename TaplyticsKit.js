@@ -38,31 +38,13 @@
 
         self.name = name;
 
-        // ****** Fill out initForwarder to load your SDK ******
-        // Note that not all arguments may apply to your SDK initialization.
-        // These are passed from mParticle, but leave them even if they are not
-        // being used.
         function initForwarder(forwarderSettings, service, testMode, trackerId, userAttributes, userIdentities) {
-            // forwarderSettings contain settings from the mParticle server that
-            // include any special filters or options that are enabled by our
-            // customers in mParticle's UI for each SDK kit
-            // service is a function used by mParticle's SDK. Keep it wherever you
-            // see it in this template
-
-            // userAttributes example: {gender: 'male', age: 25}
-
-            // userIdentities example: { 1: 'customerId', 2: 'facebookId', 7: 'emailid@email.com' }
-            // additional identityTypes can be found at https://github.com/mParticle/mparticle-sdk-javascript/blob/master-v2/src/types.js#L88-L101
-            // can ignore service, testMode, trackerId
             reportingService = service;
             settings = forwarderSettings;
             initUserAttributes = userAttributes;
             initUserIdentities = userIdentities;
 
             try {
-                // testmode is run from your test file, when testing, your
-                // script will not be loaded, but rather the stubs you create in
-                // the test file will be used
                 if (!testMode && !window.Taplytics) {
                     var taplyticsScript = document.createElement('script');
                     taplyticsScript.type = 'text/javascript';
@@ -74,9 +56,6 @@
 
                         // On load, if the clientsdk exists and there are events
                         // in the eventQueue, process each event
-                        // If your SDK queues its own methods, the following
-                        // code block is not necessary and instances of
-                        // eventQueue and isIniatialized can be removed
                         if (window.Taplytics && eventQueue.length > 0) {
                             // Process any events that may have been queued up
                             // while forwarder was being initialized.
@@ -99,19 +78,23 @@
             }
         }
 
-        // The processEvent function can be tweaked based on the types of events
-        // you want to process and how you want to map them to event logging from
-        // your SDK.
-        // This method provides the plumbing to route the events to logPageView,
-        // logPurchaseEvent, logEvent, where you can call your SDK methods directly.
+        /**
+         * Called whenever an event occurs. Used to log different types of events.
+         * @param event
+         * @returns {string}
+         */
         function processEvent(event) {
             var reportEvent = false;
             if (isInitialized) {
                 try {
                     if (event.EventDataType === MessageType.PageView) {
                         reportEvent = logPageView(event);
-                    } else if (event.EventDataType === MessageType.Commerce && event.EventCategory === mParticle.CommerceEventType.ProductPurchase) {
-                        reportEvent = logPurchaseEvent(event);
+                    } else if (event.EventDataType === MessageType.Commerce) {
+                        if (event.EventCategory === mParticle.CommerceEventType.ProductPurchase) {
+                            reportEvent = logPurchaseEvent(event);
+                        } else {
+                            reportEvent = logCommerceEvent(event);
+                        }
                     } else if (event.EventDataType === MessageType.PageEvent) {
                         reportEvent = logEvent(event);
                     }
@@ -135,11 +118,21 @@
             return 'Can\'t send to forwarder ' + name + ', not initialized. Event added to queue.';
         }
 
+        /**
+         * Helper method to check if object is empty
+         * @param obj
+         * @returns {boolean}
+         */
         function isEmpty(obj) {
-            for (var prop in obj) {return false;}
+            for (var prop in obj) { return false; }
             return true;
         }
-				
+
+        /**
+         * Helper method to merge obj 2 into obj1
+         * @param obj1
+         * @param obj2
+         */
         function mergeObjects(obj1, obj2) {
             var obj = {};
             for (var key in obj1) {
@@ -155,6 +148,10 @@
             return obj;
         }
 
+        /**
+         * Construct Taplytics src link to load the SDK
+         * @returns {string}
+         */
         function getTaplyticsSourceLink() {
             var token = settings.apiKey;
             var cookieDomain = settings.taplyticsOptionCookieDomain;
@@ -199,7 +196,11 @@
             return src;
         }
 
-        // ****** Call your logPageView function here ****** //
+        /**
+         * Logs page view event to Taplytics
+         * @param event
+         * @returns {*}
+         */
         function logPageView(event) {
             // Details on the `event` object schema in the README
             try {
@@ -212,17 +213,21 @@
                 return true;
             }
             catch (e) {
-                return {error: e};
+                return { error: e };
             }
         }
 
-        // ****** Call your eCommerce logPurchase function here ****** //
+        /**
+         * Logs purchase events as revenue events to Taplytics
+         * @param event
+         * @returns {*}
+         */
         function logPurchaseEvent(event) {
             var reportEvent = false;
             // The products purchased will be on the array event.ProductAction.ProductList
             if (event.ProductAction.ProductList) {
                 try {
-									
+
                     event.ProductAction.ProductList.forEach(function(product) {
                         // Details on the `product` object schema in the README
                         if (product.Attributes) {
@@ -234,15 +239,74 @@
                     return true;
                 }
                 catch (e) {
-                    return {error: e};
+                    return { error: e };
                 }
             }
 
             return reportEvent;
         }
 
-        // ****** Call your generic log event function here ****** //
-        // Details on the `event` object schema in the README
+        /**
+         * Logs all other commerce events as regular events with metadata to Taplytics
+         * @param event
+         * @returns {*}
+         */
+        function logCommerceEvent(event) {
+            var reportEvent = false;
+
+            var attributes = {};
+
+            if (event) {
+                try {
+                    switch (event.EventCategory) {
+                        case mParticle.CommerceEventType.ProductAddToCart:
+                            attributes['ShoppingCart'] = event.ShoppingCart;
+                            break;
+                        case mParticle.CommerceEventType.ProductRemoveFromCart:
+                            attributes['ShoppingCart'] = event.ShoppingCart;
+                            break;
+                        case mParticle.CommerceEventType.ProductImpression:
+                            if (event.ProductImpressions && event.ProductImpressions.length) {
+                                attributes['ProductImpressions'] = event.ProductImpressions;
+                            }
+                            break;
+                        case mParticle.CommerceEventType.PromotionClick:
+                            attributes['PromotionList'] = event.PromotionAction.PromotionList;
+                            break;
+                    }
+
+                    if (event.EventAttributes) {
+                        attributes['EventAttributes'] = event.EventAttributes;
+                    }
+
+                    if (event.ProductAction) {
+                        attributes['ProductAction'] = event.ProductAction;
+                    }
+
+                    if (event.CurrencyCode) {
+                        attributes['CurrencyCode'] = event.CurrencyCode;
+                    }
+
+                    if (!isEmpty(attributes)) {
+                        Taplytics.track(event.EventName, null, attributes);
+                    } else {
+                        Taplytics.track(event.EventName);
+                    }
+                    return true;
+                }
+                catch (e) {
+                    return { error: e };
+                }
+            }
+
+            return reportEvent;
+        }
+
+        /**
+         * Log Regular events
+         * @param event
+         * @returns {*}
+         */
         function logEvent(event) {
             try {
                 if (event.EventAttributes) {
@@ -254,11 +318,16 @@
                 return true;
             }
             catch (e) {
-                return {error: e};
+                return { error: e };
             }
         }
 
-        // ****** Call your setUserIdentity function here ****** //
+        /**
+         * Identifies user id or email with Taplytics
+         * @param id
+         * @param type
+         * @returns {string}
+         */
         function setUserIdentity(id, type) {
             if (isInitialized) {
                 try {
@@ -287,7 +356,12 @@
             }
         }
 
-        // ****** Call your setUserAttribute function here ****** //
+        /**
+         * Sets user attributes to Taplytics
+         * @param key
+         * @param value
+         * @returns {string}
+         */
         function setUserAttribute(key, value) {
             if (isInitialized) {
                 try {
@@ -305,13 +379,19 @@
             }
         }
 
-        // ****** Call your removeUserAttribute function here ****** //
-        // Your Sdk may have a direct method for removing a client attribute.
-        // The example below shows removing an attribute by setting its value to null.
+        /** 
+         * Remove user attribute by setting it to null
+         * @param key
+         */
         function removeUserAttribute(key) {
             setUserAttribute(key, null);
         }
 
+        /**
+         * V2 version of setting user identity
+         * @param user
+         * @returns {string}
+         */
         function onUserIdentified(user) {
             if (isInitialized) {
                 var identities = user.getUserIdentities().userIdentities;
