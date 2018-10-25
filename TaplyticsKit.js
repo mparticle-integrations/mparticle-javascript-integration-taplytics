@@ -265,13 +265,13 @@
                         case mParticle.CommerceEventType.ProductRemoveFromCart:
                             attributes['ShoppingCart'] = event.ShoppingCart;
                             break;
-                        case mParticle.CommerceEventType.PromotionClick:
-                            attributes['PromotionList'] = event.PromotionAction.PromotionList;
-                            break;
                         case mParticle.CommerceEventType.ProductImpression:
                             if (event.ProductImpressions && event.ProductImpressions.length) {
                                 attributes['ProductImpressions'] = event.ProductImpressions;
                             }
+                            break;
+                        case mParticle.CommerceEventType.PromotionClick:
+                            attributes['PromotionList'] = event.PromotionAction.PromotionList;
                             break;
                     }
 

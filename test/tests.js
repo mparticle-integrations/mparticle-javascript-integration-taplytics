@@ -235,19 +235,190 @@ describe('Taplytics Forwarder', function () {
         done();
     });
 
-    it('should not log non-product purchase events', function(done) {
+    it('should log add to cart events', function(done) {
         mParticle.forwarder.process({
-            EventName: 'Test Purchase Event',
+            EventName: 'Test Add to Cart Event',
             EventDataType: MessageType.Commerce,
-            EventCategory: EventType.Other,
+            EventCategory: CommerceEventType.ProductAddToCart,
             EventAttributes: {
-                label: 'label',
-                value: 200,
+                label: 'new product',
+                value: 2,
                 category: 'category'
-            }
+            },
+            ShoppingCart: {
+                ProductList: [
+                    'product 1',
+                    'product 2'
+                ]
+            },
+            ProductAction: {
+                ProductList: [
+                    'product 2'
+                ]
+            },
+            CurrencyCode: "yen",
+            EventIgnoreAttribute: 'some attribute'
         });
 
-        window.Taplytics.events.length.should.equal(0);
+        var events = window.Taplytics.events;
+        events.length.should.equal(1);
+
+        events[0].name.should.equal('Test Add to Cart Event');
+        (events[0].value === null).should.equal(true);
+        events[0].attributes.ShoppingCart.ProductList.length.should.equal(2);
+        events[0].attributes.ProductAction.ProductList.length.should.equal(1);
+        events[0].attributes.ProductAction.ProductList[0].should.equal('product 2');
+        events[0].attributes.EventAttributes.label.should.equal('new product');
+        events[0].attributes.EventAttributes.value.should.equal(2);
+        events[0].attributes.EventAttributes.category.should.equal('category');
+        events[0].attributes.CurrencyCode.should.equal('yen');
+        (events[0].attributes.EventIgnoreAttribute === undefined).should.equal(true);
+
+        done();
+    });
+
+    it('should log remove from cart events', function(done) {
+        mParticle.forwarder.process({
+            EventName: 'Test Remove from Cart Event',
+            EventDataType: MessageType.Commerce,
+            EventCategory: CommerceEventType.ProductRemoveFromCart,
+            EventAttributes: {
+                label: 'new product',
+                value: 2,
+                category: 'category'
+            },
+            ShoppingCart: {
+                ProductList: [
+                    'product 1',
+                ]
+            },
+            ProductAction: {
+                ProductList: [
+                    'product 2'
+                ]
+            },
+            EventIgnoreAttribute: 'some attribute',
+            CurrencyCode: 'cad'
+        });
+
+        var events = window.Taplytics.events;
+        events.length.should.equal(1);
+
+        events[0].name.should.equal('Test Remove from Cart Event');
+        (events[0].value === null).should.equal(true);
+        events[0].attributes.ShoppingCart.ProductList.length.should.equal(1);
+        events[0].attributes.ProductAction.ProductList.length.should.equal(1);
+        events[0].attributes.ProductAction.ProductList[0].should.equal('product 2');
+        events[0].attributes.EventAttributes.label.should.equal('new product');
+        events[0].attributes.EventAttributes.value.should.equal(2);
+        events[0].attributes.EventAttributes.category.should.equal('category');
+        events[0].attributes.CurrencyCode.should.equal('cad');
+        (events[0].attributes.EventIgnoreAttribute === undefined).should.equal(true);
+
+        done();
+    });
+
+    it('should log promotion click events', function(done) {
+        mParticle.forwarder.process({
+            EventName: 'Test Promotion Click Event',
+            EventDataType: MessageType.Commerce,
+            EventCategory: CommerceEventType.PromotionClick,
+            EventAttributes: {
+                'promotionID': 'id'
+            },
+            PromotionAction: {
+                PromotionList: [
+                    {
+                        Creative: 'sale_banner',
+                        Id: '74348',
+                        Name: 'promotion for yuge sales'
+                    }
+                ]
+            },
+            EventIgnoreAttribute: 'some attribute',
+            CurrencyCode: 'bison bucks'
+        });
+
+        var events = window.Taplytics.events;
+        events.length.should.equal(1);
+
+        events[0].name.should.equal('Test Promotion Click Event');
+        (events[0].value === null).should.equal(true);
+        events[0].attributes.PromotionList.length.should.equal(1);
+        events[0].attributes.PromotionList[0].should.not.equal(null);
+        events[0].attributes.PromotionList[0].Creative.should.equal('sale_banner');
+        events[0].attributes.PromotionList[0].Name.should.equal('promotion for yuge sales');
+        events[0].attributes.PromotionList[0].Id.should.equal('74348');
+        events[0].attributes.CurrencyCode.should.equal('bison bucks');
+        events[0].attributes.EventAttributes.promotionID.should.equal('id');
+        (events[0].attributes.EventIgnoreAttribute === undefined).should.equal(true);
+
+        done();
+    });
+
+    it('should log product impression events', function(done) {
+        mParticle.forwarder.process({
+            EventName: 'Test Product Impression Event',
+            EventDataType: MessageType.Commerce,
+            EventCategory: CommerceEventType.ProductImpression,
+            EventAttributes: {
+                'impression': 'good'
+            },
+            ProductImpressions: [
+                {
+                    ProductImpressionList: 'suggested products list',
+                    ProductList: [
+                        'product 1'
+                    ]
+                }
+            ],
+            EventIgnoreAttribute: 'some attribute',
+            CurrencyCode: 'bison bucks'
+        });
+
+        var events = window.Taplytics.events;
+        events.length.should.equal(1);
+        
+
+        events[0].name.should.equal('Test Product Impression Event');
+        (events[0].value === null).should.equal(true);
+        events[0].attributes.ProductImpressions.length.should.equal(1);
+        events[0].attributes.ProductImpressions[0].ProductImpressionList.should.equal('suggested products list');
+        events[0].attributes.ProductImpressions[0].ProductList.length.should.equal(1);
+        events[0].attributes.ProductImpressions[0].ProductList[0].should.equal('product 1');
+        events[0].attributes.CurrencyCode.should.equal('bison bucks');
+        events[0].attributes.EventAttributes.impression.should.equal('good');
+        (events[0].attributes.EventIgnoreAttribute === undefined).should.equal(true);
+
+        done();
+    });
+
+    it('should log other eCommerce events', function(done) {
+        mParticle.forwarder.process({
+            EventName: 'Test Refund Event',
+            EventDataType: MessageType.Commerce,
+            EventCategory: CommerceEventType.ProductRefund,
+            EventAttributes: {
+                'reason': 'i hate it'
+            },
+            ProductAction: {
+                ProductList: [
+                    'product 1'
+                ]
+            },
+            EventIgnoreAttribute: 'some attribute',
+            CurrencyCode: 'pennies'
+        });
+
+        var events = window.Taplytics.events;
+        events.length.should.equal(1);
+
+        events[0].name.should.equal('Test Refund Event');
+        (events[0].value === null).should.equal(true);
+        events[0].attributes.EventAttributes.reason.should.equal('i hate it');
+        events[0].attributes.ProductAction.ProductList.length.should.equal(1);
+        events[0].attributes.CurrencyCode.should.equal('pennies');
+        (events[0].attributes.EventIgnoreAttribute === undefined).should.equal(true);
 
         done();
     });
