@@ -258,14 +258,39 @@
 
             if (event) {
                 try {
-                    for (var key in event) {
-                        if (event[key]) {
-                            attributes[key] = event[key];
-                        }
+                    switch (event.EventCategory) {
+                        case mParticle.CommerceEventType.ProductAddToCart:
+                            attributes['ShoppingCart'] = event.ShoppingCart;
+                            break;
+                        case mParticle.CommerceEventType.ProductRemoveFromCart:
+                            attributes['ShoppingCart'] = event.ShoppingCart;
+                            break;
+                        case mParticle.CommerceEventType.PromotionClick:
+                            attributes['PromotionList'] = event.PromotionAction.PromotionList;
+                            break;
+                        case mParticle.CommerceEventType.ProductImpression:
+                            if (event.ProductImpressions && event.ProductImpressions.length) {
+                                attributes['ProductImpressions'] = event.ProductImpressions;
+                            }
+                            break;
+                    }
+
+                    if (event.EventAttributes) {
+                        attributes['EventAttributes'] = event.EventAttributes;
+                    }
+
+                    if (event.ProductAction) {
+                        attributes['ProductAction'] = event.ProductAction;
+                    }
+
+                    if (event.CurrencyCode) {
+                        attributes['CurrencyCode'] = event.CurrencyCode;
                     }
 
                     if (!isEmpty(attributes)) {
                         Taplytics.track(event.EventName, null, attributes);
+                    } else {
+                        Taplytics.track(event.EventName);
                     }
                     return true;
                 }
