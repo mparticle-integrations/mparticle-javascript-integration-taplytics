@@ -220,12 +220,12 @@ describe('Taplytics Forwarder', function () {
 
         events.length.should.equal(2);
 
-        events[0].name.should.equal('iPhone 6');
+        events[0].name.should.equal('Test Purchase Event');
         events[0].value.should.equal(400);
         events[0].attributes.Sku.should.equal('12345');
         events[0].attributes.Category.should.equal('Phones');
 
-        events[1].name.should.equal('iPhone Xs Max');
+        events[1].name.should.equal('Test Purchase Event');
         events[1].value.should.equal(1000);
         events[1].attributes.size.should.equal('huge');
         events[1].attributes.notch.should.equal(true);

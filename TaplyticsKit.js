@@ -224,22 +224,30 @@
          */
         function logPurchaseEvent(event) {
             var reportEvent = false;
-            // The products purchased will be on the array event.ProductAction.ProductList
             if (event.ProductAction.ProductList) {
                 try {
 
                     event.ProductAction.ProductList.forEach(function(product) {
-                        // Details on the `product` object schema in the README
+                        var attributes = product;
                         if (product.Attributes) {
-                            Taplytics.track(event.EventName, parseFloat(product.TotalAmount), mergeObjects(product.Attributes, product));
-                        } else {
-                            Taplytics.track(event.EventName, parseFloat(product.TotalAmount), product);
+                            attributes = mergeObjects(product.Attributes, product);
                         }
-                    }, this);
+
+                        if (event.EventAttributes) {
+                            attributes['EventAttributes'] = event.EventAttributes;
+                        }
+
+                        if (event.CurrencyCode) {
+                            attributes['CurrencyCode'] = event.CurrencyCode;
+                        }
+
+                        Taplytics.track(this.EventName, parseFloat(product.TotalAmount), attributes);
+
+                    }, event);
                     return true;
                 }
                 catch (e) {
-                    return { error: e };
+                    return {error: e};
                 }
             }
 
