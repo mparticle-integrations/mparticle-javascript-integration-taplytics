@@ -244,7 +244,7 @@
                     Taplytics.page(event.EventName, event.EventAttributes);
                 }
                 else {
-                    Taplytics.track(event.EventName);
+                    trackEvent(event.EventName);
                 }
                 return true;
             }
@@ -262,8 +262,9 @@
             var reportEvent = false;
             if (event.ProductAction.ProductList) {
                 try {
-
-                    event.ProductAction.ProductList.forEach(function(product) {
+                    var productList = event.ProductAction.ProductList;
+                    for (var i = 0; i < productList.length; i++) {
+                        var product = productList[i];
                         var attributes = product;
                         if (product.Attributes) {
                             attributes = mergeObjects(product.Attributes, product);
@@ -277,9 +278,8 @@
                             attributes['CurrencyCode'] = event.CurrencyCode;
                         }
 
-                        Taplytics.track(this.EventName, parseFloat(product.TotalAmount), attributes);
-
-                    }, event);
+                        trackEvent(event.EventName, parseFloat(product.TotalAmount), attributes);
+                    }
                     return true;
                 }
                 catch (e) {
@@ -378,12 +378,7 @@
          */
         function logEvent(event) {
             try {
-                if (event.EventAttributes) {
-                    Taplytics.track(event.EventName, null, event.EventAttributes);
-                }
-                else {
-                    Taplytics.track(event.EventName);
-                }
+                trackEvent(event.EventName, null, event.EventAttributes);
                 return true;
             }
             catch (e) {
