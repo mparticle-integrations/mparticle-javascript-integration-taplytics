@@ -148,6 +148,38 @@
             return obj;
         }
 
+        function clone(obj) {
+            let copy = {};
+            for (let key in obj) {
+              if (obj.hasOwnProperty(key)) {
+                copy[key] = obj[key];
+              }
+            }
+            return copy;
+          }
+
+        /**
+         * tracks Taplytics events 
+         * @param {*} event 
+         * @param {*} revenue 
+         * @param {*} attributes 
+         */
+        function trackEvent(event, revenue, attributes) {
+            if (revenue) {
+                if (attributes && !isEmpty(attributes)) {
+                    Taplytics.track(event, revenue, attributes);
+                } else {
+                    Taplytics.track(event, revenue);
+                }
+            } else {
+                if (attributes && !isEmpty(attributes)) {
+                    Taplytics.track(event, null, attributes);
+                } else {
+                    Taplytics.track(event);
+                }
+            }
+        }
+
         /**
          * Construct Taplytics src link to load the SDK
          * @returns {string}
@@ -287,18 +319,20 @@
                         if (impressions && impressions.length) {
                             for (var i = 0; i < impressions.length; i++) {
                                 var productList = impressions[i].ProductList;
+                                var impressionName = impressions[i].ProductImpressionList;
                                 if (!productList) {
                                     continue;
                                 }
                                 
-                                for (var i = 0; i < productList.length; i++) {
-                                    var productAttributes = productList[i];
-                                    if (productList[i].Attributes) {
-                                        productAttributes = mergeObjects(productList[i], productList[i].Attributes);
+                                for (var j = 0; j < productList.length; j++) {
+                                    var productAttributes = productList[j];
+                                    var attributeCopy = clone(attributes);
+                                    if (productList[j].Attributes) {
+                                        productAttributes = mergeObjects(productList[j], productList[j].Attributes);
                                     }
-                                    attributes["ProductImpression"] = impressions[i].ProductImpressionList;
-                                    attributes["ProductImpressionProduct"] = productList[i];
-                                    trackEvent(event.EventName, null, attributes);
+                                    attributeCopy["ProductImpression"] = impressionName;
+                                    attributeCopy["ProductImpressionProduct"] = productAttributes;
+                                    trackEvent(event.EventName, null, attributeCopy);
                                 }
                             }
                         }
@@ -314,6 +348,9 @@
                                     productAttributes = mergeObjects(productList[i], productList[i].Attributes);
                                 }
                                 attributes["ProductAction"] = productAttributes;
+                                if (event.ShoppingCart && event.ShoppingCart.ProductList) {
+                                    attributes["ShoppingCart"] = event.ShoppingCart.ProductList;
+                                }
                                 trackEvent(event.EventName, null, attributes);
                             }
                         }
