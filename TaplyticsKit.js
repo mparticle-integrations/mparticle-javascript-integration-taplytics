@@ -148,6 +148,10 @@
             return obj;
         }
 
+        /**
+         * Helper method to clone an object
+         * @param {*} obj 
+         */
         function clone(obj) {
             let copy = {};
             for (let key in obj) {
