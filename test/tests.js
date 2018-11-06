@@ -222,15 +222,15 @@ describe('Taplytics Forwarder', function () {
 
         events[0].name.should.equal('Test Purchase Event');
         events[0].value.should.equal(400);
-        events[0].attributes.Sku.should.equal('12345');
-        events[0].attributes.Category.should.equal('Phones');
+        events[0].attributes.ProductAttributes.Sku.should.equal('12345');
+        events[0].attributes.ProductAttributes.Category.should.equal('Phones');
 
         events[1].name.should.equal('Test Purchase Event');
         events[1].value.should.equal(1000);
-        events[1].attributes.size.should.equal('huge');
-        events[1].attributes.notch.should.equal(true);
-        events[1].attributes.Sku.should.equal('09876');
-        events[1].attributes.Variant.should.equal('Xs Max');
+        events[1].attributes.ProductAttributes.size.should.equal('huge');
+        events[1].attributes.ProductAttributes.notch.should.equal(true);
+        events[1].attributes.ProductAttributes.Sku.should.equal('09876');
+        events[1].attributes.ProductAttributes.Variant.should.equal('Xs Max');
 
         done();
     });
@@ -266,7 +266,7 @@ describe('Taplytics Forwarder', function () {
         events[0].name.should.equal('Test Add to Cart Event');
         (events[0].value === null).should.equal(true);
         events[0].attributes.ShoppingCart.length.should.equal(2);
-        events[0].attributes.ProductAction.should.equal('product 2');
+        events[0].attributes.ProductAttributes.should.equal('product 2');
         events[0].attributes.EventAttributes.label.should.equal('new product');
         events[0].attributes.EventAttributes.value.should.equal(2);
         events[0].attributes.EventAttributes.category.should.equal('category');
@@ -306,7 +306,7 @@ describe('Taplytics Forwarder', function () {
         events[0].name.should.equal('Test Remove from Cart Event');
         (events[0].value === null).should.equal(true);
         events[0].attributes.ShoppingCart.length.should.equal(1);
-        events[0].attributes.ProductAction.should.equal('product 2');
+        events[0].attributes.ProductAttributes.should.equal('product 2');
         events[0].attributes.EventAttributes.label.should.equal('new product');
         events[0].attributes.EventAttributes.value.should.equal(2);
         events[0].attributes.EventAttributes.category.should.equal('category');
@@ -420,7 +420,7 @@ describe('Taplytics Forwarder', function () {
         events[0].name.should.equal('Test Refund Event');
         (events[0].value === null).should.equal(true);
         events[0].attributes.EventAttributes.reason.should.equal('i hate it');
-        events[0].attributes.ProductAction.should.equal('product 1');
+        events[0].attributes.ProductAttributes.should.equal('product 1');
         events[0].attributes.CurrencyCode.should.equal('pennies');
         (events[0].attributes.EventIgnoreAttribute === undefined).should.equal(true);
 

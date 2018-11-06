@@ -59,9 +59,9 @@
                         if (window.Taplytics && eventQueue.length > 0) {
                             // Process any events that may have been queued up
                             // while forwarder was being initialized.
-                            for (var i = 0; i < eventQueue.length; i++) {
-                                processEvent(eventQueue[i]);
-                            }
+                            eventQueue.forEach(function(event) {
+                                processEvent(event);
+                            });
 
                             eventQueue = [];
                         }
@@ -153,7 +153,7 @@
          * @param {*} obj 
          */
         function clone(obj) {
-            let copy = {};
+            var copy = {};
             for (let key in obj) {
               if (obj.hasOwnProperty(key)) {
                 copy[key] = obj[key];
@@ -263,11 +263,12 @@
             if (event.ProductAction.ProductList) {
                 try {
                     var productList = event.ProductAction.ProductList;
-                    for (var i = 0; i < productList.length; i++) {
-                        var product = productList[i];
-                        var attributes = product;
+                    productList.forEach(function(product) {
+                        var product = product;
+                        var attributes = {};
+                        var productAttributes = product;
                         if (product.Attributes) {
-                            attributes = mergeObjects(product.Attributes, product);
+                            productAttributes = mergeObjects(product.Attributes, product);
                         }
 
                         if (event.EventAttributes) {
@@ -278,8 +279,10 @@
                             attributes['CurrencyCode'] = event.CurrencyCode;
                         }
 
-                        trackEvent(event.EventName, parseFloat(product.TotalAmount), attributes);
-                    }
+                        attributes['ProductAttributes'] = productAttributes;
+
+                        Taplytics.track(event.EventName, parseFloat(product.TotalAmount), attributes);
+                    });
                     return true;
                 }
                 catch (e) {
@@ -312,33 +315,33 @@
                     
                     if (event.EventCategory === mParticle.CommerceEventType.PromotionClick) {
                         var promotionList = event.PromotionAction.PromotionList;
-                        if (promotionList && promotionList.length) {
-                            for (var i = 0; i < promotionList.length; i++) {
-                                attributes["Promotion"] = promotionList[i];
+                        if (promotionList) {
+                            promotionList.forEach(function(promotion) {
+                                attributes["Promotion"] = promotion;
                                 trackEvent(event.EventName, null, attributes);
-                            }
+                            });
                         }
                     } else if (event.EventCategory === mParticle.CommerceEventType.ProductImpression) {
                         var impressions = event.ProductImpressions;
-                        if (impressions && impressions.length) {
-                            for (var i = 0; i < impressions.length; i++) {
-                                var productList = impressions[i].ProductList;
-                                var impressionName = impressions[i].ProductImpressionList;
+                        if (impressions) {
+                            impressions.forEach(function(impression) {
+                                var productList = impression.ProductList;
+                                var impressionName = impression.ProductImpressionList;
                                 if (!productList) {
-                                    continue;
+                                    return;
                                 }
-                                
-                                for (var j = 0; j < productList.length; j++) {
-                                    var productAttributes = productList[j];
+                                productList.forEach(function(product) {
+                                    var productAttributes = product;
                                     var attributeCopy = clone(attributes);
-                                    if (productList[j].Attributes) {
-                                        productAttributes = mergeObjects(productList[j], productList[j].Attributes);
+                                    if (product.Attributes) {
+                                        productAttributes = mergeObjects(product, product.Attributes);
                                     }
+                                    
                                     attributeCopy["ProductImpression"] = impressionName;
                                     attributeCopy["ProductImpressionProduct"] = productAttributes;
                                     trackEvent(event.EventName, null, attributeCopy);
-                                }
-                            }
+                                });
+                            });
                         }
                     } else if (event.EventCategory === mParticle.CommerceEventType.ProductAddToCart ||
                         event.EventCategory === mParticle.CommerceEventType.ProductRemoveFromCart || 
@@ -346,17 +349,17 @@
 
                         if (event.ProductAction.ProductList) {
                             var productList = event.ProductAction.ProductList;
-                            for (var i = 0; i < productList.length; i++) {
-                                var productAttributes = productList[i];
-                                if (productList[i].Attributes) {
-                                    productAttributes = mergeObjects(productList[i], productList[i].Attributes);
+                            productList.forEach(function(product) {
+                                var productAttributes = product;
+                                if (product.Attributes) {
+                                    productAttributes = mergeObjects(product, product.Attributes);
                                 }
-                                attributes["ProductAction"] = productAttributes;
+                                attributes["ProductAttributes"] = productAttributes;
                                 if (event.ShoppingCart && event.ShoppingCart.ProductList) {
                                     attributes["ShoppingCart"] = event.ShoppingCart.ProductList;
                                 }
                                 trackEvent(event.EventName, null, attributes);
-                            }
+                            });
                         }
                     } else {
                         trackEvent(event.EventName, null, attributes);
