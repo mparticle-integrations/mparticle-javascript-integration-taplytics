@@ -327,20 +327,19 @@
                             impressions.forEach(function(impression) {
                                 var productList = impression.ProductList;
                                 var impressionName = impression.ProductImpressionList;
-                                if (!productList) {
-                                    return;
+                                if (productList) {
+                                    productList.forEach(function(product) {
+                                        var productAttributes = product;
+                                        var attributeCopy = clone(attributes);
+                                        if (product.Attributes) {
+                                            productAttributes = mergeObjects(product, product.Attributes);
+                                        }
+    
+                                        attributeCopy["ProductImpression"] = impressionName;
+                                        attributeCopy["ProductImpressionProduct"] = productAttributes;
+                                        trackEvent(event.EventName, null, attributeCopy);
+                                    });
                                 }
-                                productList.forEach(function(product) {
-                                    var productAttributes = product;
-                                    var attributeCopy = clone(attributes);
-                                    if (product.Attributes) {
-                                        productAttributes = mergeObjects(product, product.Attributes);
-                                    }
-                                    
-                                    attributeCopy["ProductImpression"] = impressionName;
-                                    attributeCopy["ProductImpressionProduct"] = productAttributes;
-                                    trackEvent(event.EventName, null, attributeCopy);
-                                });
                             });
                         }
                     } else if (event.EventCategory === mParticle.CommerceEventType.ProductAddToCart ||
