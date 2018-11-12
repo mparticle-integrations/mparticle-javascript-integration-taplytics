@@ -220,17 +220,17 @@ describe('Taplytics Forwarder', function () {
 
         events.length.should.equal(2);
 
-        events[0].name.should.equal('iPhone 6');
+        events[0].name.should.equal('Test Purchase Event');
         events[0].value.should.equal(400);
-        events[0].attributes.Sku.should.equal('12345');
-        events[0].attributes.Category.should.equal('Phones');
+        events[0].attributes.ProductAttributes.Sku.should.equal('12345');
+        events[0].attributes.ProductAttributes.Category.should.equal('Phones');
 
-        events[1].name.should.equal('iPhone Xs Max');
+        events[1].name.should.equal('Test Purchase Event');
         events[1].value.should.equal(1000);
-        events[1].attributes.size.should.equal('huge');
-        events[1].attributes.notch.should.equal(true);
-        events[1].attributes.Sku.should.equal('09876');
-        events[1].attributes.Variant.should.equal('Xs Max');
+        events[1].attributes.ProductAttributes.size.should.equal('huge');
+        events[1].attributes.ProductAttributes.notch.should.equal(true);
+        events[1].attributes.ProductAttributes.Sku.should.equal('09876');
+        events[1].attributes.ProductAttributes.Variant.should.equal('Xs Max');
 
         done();
     });
@@ -265,9 +265,8 @@ describe('Taplytics Forwarder', function () {
 
         events[0].name.should.equal('Test Add to Cart Event');
         (events[0].value === null).should.equal(true);
-        events[0].attributes.ShoppingCart.ProductList.length.should.equal(2);
-        events[0].attributes.ProductAction.ProductList.length.should.equal(1);
-        events[0].attributes.ProductAction.ProductList[0].should.equal('product 2');
+        events[0].attributes.ShoppingCart.length.should.equal(2);
+        events[0].attributes.ProductAttributes.should.equal('product 2');
         events[0].attributes.EventAttributes.label.should.equal('new product');
         events[0].attributes.EventAttributes.value.should.equal(2);
         events[0].attributes.EventAttributes.category.should.equal('category');
@@ -306,9 +305,8 @@ describe('Taplytics Forwarder', function () {
 
         events[0].name.should.equal('Test Remove from Cart Event');
         (events[0].value === null).should.equal(true);
-        events[0].attributes.ShoppingCart.ProductList.length.should.equal(1);
-        events[0].attributes.ProductAction.ProductList.length.should.equal(1);
-        events[0].attributes.ProductAction.ProductList[0].should.equal('product 2');
+        events[0].attributes.ShoppingCart.length.should.equal(1);
+        events[0].attributes.ProductAttributes.should.equal('product 2');
         events[0].attributes.EventAttributes.label.should.equal('new product');
         events[0].attributes.EventAttributes.value.should.equal(2);
         events[0].attributes.EventAttributes.category.should.equal('category');
@@ -344,11 +342,10 @@ describe('Taplytics Forwarder', function () {
 
         events[0].name.should.equal('Test Promotion Click Event');
         (events[0].value === null).should.equal(true);
-        events[0].attributes.PromotionList.length.should.equal(1);
-        events[0].attributes.PromotionList[0].should.not.equal(null);
-        events[0].attributes.PromotionList[0].Creative.should.equal('sale_banner');
-        events[0].attributes.PromotionList[0].Name.should.equal('promotion for yuge sales');
-        events[0].attributes.PromotionList[0].Id.should.equal('74348');
+        events[0].attributes.Promotion.should.not.equal(null);
+        events[0].attributes.Promotion.Creative.should.equal('sale_banner');
+        events[0].attributes.Promotion.Name.should.equal('promotion for yuge sales');
+        events[0].attributes.Promotion.Id.should.equal('74348');
         events[0].attributes.CurrencyCode.should.equal('bison bucks');
         events[0].attributes.EventAttributes.promotionID.should.equal('id');
         (events[0].attributes.EventIgnoreAttribute === undefined).should.equal(true);
@@ -368,7 +365,8 @@ describe('Taplytics Forwarder', function () {
                 {
                     ProductImpressionList: 'suggested products list',
                     ProductList: [
-                        'product 1'
+                        'product 1',
+                        'product 2'
                     ]
                 }
             ],
@@ -377,18 +375,24 @@ describe('Taplytics Forwarder', function () {
         });
 
         var events = window.Taplytics.events;
-        events.length.should.equal(1);
+        events.length.should.equal(2);
         
 
         events[0].name.should.equal('Test Product Impression Event');
         (events[0].value === null).should.equal(true);
-        events[0].attributes.ProductImpressions.length.should.equal(1);
-        events[0].attributes.ProductImpressions[0].ProductImpressionList.should.equal('suggested products list');
-        events[0].attributes.ProductImpressions[0].ProductList.length.should.equal(1);
-        events[0].attributes.ProductImpressions[0].ProductList[0].should.equal('product 1');
+        events[0].attributes.ProductImpression.should.equal('suggested products list');
+        events[0].attributes.ProductImpressionProduct.should.equal('product 1');
         events[0].attributes.CurrencyCode.should.equal('bison bucks');
         events[0].attributes.EventAttributes.impression.should.equal('good');
         (events[0].attributes.EventIgnoreAttribute === undefined).should.equal(true);
+
+        events[1].name.should.equal('Test Product Impression Event');
+        (events[1].value === null).should.equal(true);
+        events[1].attributes.ProductImpression.should.equal('suggested products list');
+        events[1].attributes.ProductImpressionProduct.should.equal('product 2');
+        events[1].attributes.CurrencyCode.should.equal('bison bucks');
+        events[1].attributes.EventAttributes.impression.should.equal('good');
+        (events[1].attributes.EventIgnoreAttribute === undefined).should.equal(true);
 
         done();
     });
@@ -416,7 +420,7 @@ describe('Taplytics Forwarder', function () {
         events[0].name.should.equal('Test Refund Event');
         (events[0].value === null).should.equal(true);
         events[0].attributes.EventAttributes.reason.should.equal('i hate it');
-        events[0].attributes.ProductAction.ProductList.length.should.equal(1);
+        events[0].attributes.ProductAttributes.should.equal('product 1');
         events[0].attributes.CurrencyCode.should.equal('pennies');
         (events[0].attributes.EventIgnoreAttribute === undefined).should.equal(true);
 

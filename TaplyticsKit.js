@@ -59,9 +59,9 @@
                         if (window.Taplytics && eventQueue.length > 0) {
                             // Process any events that may have been queued up
                             // while forwarder was being initialized.
-                            for (var i = 0; i < eventQueue.length; i++) {
-                                processEvent(eventQueue[i]);
-                            }
+                            eventQueue.forEach(function(event) {
+                                processEvent(event);
+                            });
 
                             eventQueue = [];
                         }
@@ -149,6 +149,42 @@
         }
 
         /**
+         * Helper method to clone an object
+         * @param {*} obj 
+         */
+        function clone(obj) {
+            var copy = {};
+            for (let key in obj) {
+              if (obj.hasOwnProperty(key)) {
+                copy[key] = obj[key];
+              }
+            }
+            return copy;
+          }
+
+        /**
+         * tracks Taplytics events 
+         * @param {*} event 
+         * @param {*} revenue 
+         * @param {*} attributes 
+         */
+        function trackEvent(event, revenue, attributes) {
+            if (revenue) {
+                if (attributes && !isEmpty(attributes)) {
+                    Taplytics.track(event, revenue, attributes);
+                } else {
+                    Taplytics.track(event, revenue);
+                }
+            } else {
+                if (attributes && !isEmpty(attributes)) {
+                    Taplytics.track(event, null, attributes);
+                } else {
+                    Taplytics.track(event);
+                }
+            }
+        }
+
+        /**
          * Construct Taplytics src link to load the SDK
          * @returns {string}
          */
@@ -208,7 +244,7 @@
                     Taplytics.page(event.EventName, event.EventAttributes);
                 }
                 else {
-                    Taplytics.track(event.EventName);
+                    trackEvent(event.EventName);
                 }
                 return true;
             }
@@ -224,22 +260,33 @@
          */
         function logPurchaseEvent(event) {
             var reportEvent = false;
-            // The products purchased will be on the array event.ProductAction.ProductList
             if (event.ProductAction.ProductList) {
                 try {
-
-                    event.ProductAction.ProductList.forEach(function(product) {
-                        // Details on the `product` object schema in the README
+                    var productList = event.ProductAction.ProductList;
+                    productList.forEach(function(product) {
+                        var product = product;
+                        var attributes = {};
+                        var productAttributes = product;
                         if (product.Attributes) {
-                            Taplytics.track(product.Name, parseFloat(product.TotalAmount), mergeObjects(product.Attributes, product));
-                        } else {
-                            Taplytics.track(product.Name, parseFloat(product.TotalAmount), product);
+                            productAttributes = mergeObjects(product.Attributes, product);
                         }
+
+                        if (event.EventAttributes) {
+                            attributes['EventAttributes'] = event.EventAttributes;
+                        }
+
+                        if (event.CurrencyCode) {
+                            attributes['CurrencyCode'] = event.CurrencyCode;
+                        }
+
+                        attributes['ProductAttributes'] = productAttributes;
+
+                        Taplytics.track(event.EventName, parseFloat(product.TotalAmount), attributes);
                     });
                     return true;
                 }
                 catch (e) {
-                    return { error: e };
+                    return {error: e};
                 }
             }
 
@@ -258,63 +305,82 @@
 
             if (event) {
                 try {
-                    switch (event.EventCategory) {
-                        case mParticle.CommerceEventType.ProductAddToCart:
-                            attributes['ShoppingCart'] = event.ShoppingCart;
-                            break;
-                        case mParticle.CommerceEventType.ProductRemoveFromCart:
-                            attributes['ShoppingCart'] = event.ShoppingCart;
-                            break;
-                        case mParticle.CommerceEventType.ProductImpression:
-                            if (event.ProductImpressions && event.ProductImpressions.length) {
-                                attributes['ProductImpressions'] = event.ProductImpressions;
-                            }
-                            break;
-                        case mParticle.CommerceEventType.PromotionClick:
-                            attributes['PromotionList'] = event.PromotionAction.PromotionList;
-                            break;
-                    }
-
                     if (event.EventAttributes) {
                         attributes['EventAttributes'] = event.EventAttributes;
-                    }
-
-                    if (event.ProductAction) {
-                        attributes['ProductAction'] = event.ProductAction;
                     }
 
                     if (event.CurrencyCode) {
                         attributes['CurrencyCode'] = event.CurrencyCode;
                     }
+                    
+                    if (event.EventCategory === mParticle.CommerceEventType.PromotionClick) {
+                        var promotionList = event.PromotionAction.PromotionList;
+                        if (promotionList) {
+                            promotionList.forEach(function(promotion) {
+                                attributes["Promotion"] = promotion;
+                                trackEvent(event.EventName, null, attributes);
+                            });
+                        }
+                    } else if (event.EventCategory === mParticle.CommerceEventType.ProductImpression) {
+                        var impressions = event.ProductImpressions;
+                        if (impressions) {
+                            impressions.forEach(function(impression) {
+                                var productList = impression.ProductList;
+                                var impressionName = impression.ProductImpressionList;
+                                if (productList) {
+                                    productList.forEach(function(product) {
+                                        var productAttributes = product;
+                                        var attributeCopy = clone(attributes);
+                                        if (product.Attributes) {
+                                            productAttributes = mergeObjects(product, product.Attributes);
+                                        }
+    
+                                        attributeCopy["ProductImpression"] = impressionName;
+                                        attributeCopy["ProductImpressionProduct"] = productAttributes;
+                                        trackEvent(event.EventName, null, attributeCopy);
+                                    });
+                                }
+                            });
+                        }
+                    } else if (event.EventCategory === mParticle.CommerceEventType.ProductAddToCart ||
+                        event.EventCategory === mParticle.CommerceEventType.ProductRemoveFromCart || 
+                        event.ProductAction) {
 
-                    if (!isEmpty(attributes)) {
-                        Taplytics.track(event.EventName, null, attributes);
+                        if (event.ProductAction.ProductList) {
+                            var productList = event.ProductAction.ProductList;
+                            productList.forEach(function(product) {
+                                var productAttributes = product;
+                                if (product.Attributes) {
+                                    productAttributes = mergeObjects(product, product.Attributes);
+                                }
+                                attributes["ProductAttributes"] = productAttributes;
+                                if (event.ShoppingCart && event.ShoppingCart.ProductList) {
+                                    attributes["ShoppingCart"] = event.ShoppingCart.ProductList;
+                                }
+                                trackEvent(event.EventName, null, attributes);
+                            });
+                        }
                     } else {
-                        Taplytics.track(event.EventName);
+                        trackEvent(event.EventName, null, attributes);
                     }
+
                     return true;
                 }
                 catch (e) {
-                    return { error: e };
+                    return {error: e};
                 }
             }
 
             return reportEvent;
-        }
+		}
 
         /**
-         * Log Regular events
-         * @param event
-         * @returns {*}
+         * Log regular Taplytics events
+         * @param {*} event 
          */
         function logEvent(event) {
             try {
-                if (event.EventAttributes) {
-                    Taplytics.track(event.EventName, null, event.EventAttributes);
-                }
-                else {
-                    Taplytics.track(event.EventName);
-                }
+                trackEvent(event.EventName, null, event.EventAttributes);
                 return true;
             }
             catch (e) {
