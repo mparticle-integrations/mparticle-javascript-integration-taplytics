@@ -204,6 +204,12 @@
                 query = query + (query ? '&' : '') + 'cookieDomain=' + cookieDomain;
             }
 
+            var userBucketing = settings.taplyticsOptionUserBucketing;
+
+            if (userBucketing === 'True') {
+                query = query + (query ? '&' : '') + 'user_bucketing=true';
+            }
+
             var user_attributes = initUserAttributes || {};
 
             if (initUserIdentities.length) {
