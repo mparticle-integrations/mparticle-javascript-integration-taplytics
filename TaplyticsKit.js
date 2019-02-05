@@ -69,6 +69,9 @@
                 }
                 else {
                     isInitialized = true;
+                    if (testMode) {
+                        Taplytics.src = getTaplyticsSourceLink();
+                    }
                 }
 
                 return 'Taplytics successfully loaded';
