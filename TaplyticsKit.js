@@ -69,6 +69,9 @@
                 }
                 else {
                     isInitialized = true;
+                    if (testMode) {
+                        Taplytics.src = getTaplyticsSourceLink();
+                    }
                 }
 
                 return 'Taplytics successfully loaded';
@@ -202,6 +205,12 @@
 
             if (cookieDomain) {
                 query = query + (query ? '&' : '') + 'cookieDomain=' + cookieDomain;
+            }
+
+            var userBucketing = settings.taplyticsOptionUserBucketing;
+
+            if (userBucketing === 'True') {
+                query = query + (query ? '&' : '') + 'user_bucketing=true';
             }
 
             var user_attributes = initUserAttributes || {};
