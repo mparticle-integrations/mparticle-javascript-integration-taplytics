@@ -17,6 +17,7 @@
 
 (function (window) {
     var name = 'Taplytics',
+        moduleId = 129,
         MessageType = {
             SessionStart: 1,
             SessionEnd: 2,
@@ -494,12 +495,29 @@
         this.onUserIdentified = onUserIdentified;
     };
 
+    function getId() {
+        return moduleId;
+    }
+
+    function register(config) {
+        if (config.kits) {
+            config.kits[name] = {
+                constructor: constructor
+            };
+        }
+    }
+
     if (!window || !window.mParticle || !window.mParticle.addForwarder) {
         return;
     }
 
     window.mParticle.addForwarder({
         name: name,
-        constructor: constructor
+        constructor: constructor,
+        getId: getId
     });
+
+    module.exports = {
+        register: register
+    };
 })(window);
