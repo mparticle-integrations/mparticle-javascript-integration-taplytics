@@ -7,7 +7,7 @@ export default [{
         file: 'TaplyticsKit.js',
        format: 'umd',
         exports: 'named',
-        name: 'mp-simplereach-kit',
+        name: 'mp-taplytics-kit',
         strict: false
     },
     plugins: [
@@ -23,7 +23,7 @@ export default [{
         file: 'dist/TaplyticsKit.js',
         format: 'umd',
         exports: 'named',
-        name: 'mp-simplereach-kit',
+        name: 'mp-taplytics-kit',
         strict: false
     },
     plugins: [

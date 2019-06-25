@@ -168,7 +168,7 @@
 	         */
 	        function clone(obj) {
 	            var copy = {};
-	            for (let key in obj) {
+	            for (var key in obj) {
 	              if (obj.hasOwnProperty(key)) {
 	                copy[key] = obj[key];
 	              }
