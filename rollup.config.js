@@ -1,36 +1,53 @@
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 
-export default [{
-    input: 'src/TaplyticsKit.js',
-    output: {
-        file: 'TaplyticsKit.js',
-       format: 'umd',
-        exports: 'named',
-        name: 'mp-taplytics-kit',
-        strict: false
+export default [
+    {
+        input: 'src/TaplyticsKit.js',
+        output: {
+            file: 'TaplyticsKit.js',
+            format: 'iife',
+            exports: 'named',
+            name: 'mpTapylitcsKit',
+            strict: false
+        },
+        plugins: [
+            resolve({
+                browser: true
+            }),
+            commonjs()
+        ]
     },
-    plugins: [
-        resolve({
-            browser: true
-        }),
-        commonjs()
-    ]
-},
-{
-    input: 'src/TaplyticsKit.js',
-    output: {
-        file: 'dist/TaplyticsKit.js',
-        format: 'umd',
-        exports: 'named',
-        name: 'mp-taplytics-kit',
-        strict: false
+    {
+        input: 'src/TaplyticsKit.js',
+        output: {
+            file: 'dist/TaplyticsKit.js',
+            format: 'iife',
+            exports: 'named',
+            name: 'mpTapylitcsKit',
+            strict: false
+        },
+        plugins: [
+            resolve({
+                browser: true
+            }),
+            commonjs()
+        ]
     },
-    plugins: [
-        resolve({
-            browser: true
-        }),
-        commonjs()
-    ]
-}
-] 
+    {
+        input: 'src/TaplyticsKit.js',
+        output: {
+            file: 'npm/TaplyticsKit.js',
+            format: 'cjs',
+            exports: 'named',
+            name: 'mpTapylitcsKit',
+            strict: false
+        },
+        plugins: [
+            resolve({
+                browser: true
+            }),
+            commonjs()
+        ]
+    }
+]

@@ -1,542 +1,566 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(global = global || self, factory(global['mp-taplytics-kit'] = {}));
-}(this, function (exports) {
-	function createCommonjsModule(fn, module) {
-		return module = { exports: {} }, fn(module, module.exports), module.exports;
-	}
+var mpTapylitcsKit = (function (exports) {
+  /*!
+   * isobject <https://github.com/jonschlinkert/isobject>
+   *
+   * Copyright (c) 2014-2017, Jon Schlinkert.
+   * Released under the MIT License.
+   */
 
-	var TaplyticsKit = createCommonjsModule(function (module) {
-	/* eslint-disable no-undef */
+  function isObject(val) {
+    return val != null && typeof val === 'object' && Array.isArray(val) === false;
+  }
 
-	//
-	//  Copyright 2018 mParticle, Inc.
-	//
-	//  Licensed under the Apache License, Version 2.0 (the "License");
-	//  you may not use this file except in compliance with the License.
-	//  You may obtain a copy of the License at
-	//
-	//      http://www.apache.org/licenses/LICENSE-2.0
-	//
-	//  Unless required by applicable law or agreed to in writing, software
-	//  distributed under the License is distributed on an "AS IS" BASIS,
-	//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	//  See the License for the specific language governing permissions and
-	//  limitations under the License.
+  var isobject = /*#__PURE__*/Object.freeze({
+    'default': isObject
+  });
 
-	(function (window) {
-	    var name = 'Taplytics',
-	        moduleId = 129,
-	        MessageType = {
-	            SessionStart: 1,
-	            SessionEnd: 2,
-	            PageView: 3,
-	            PageEvent: 4,
-	            CrashReport: 5,
-	            OptOut: 6,
-	            Commerce: 16
-	        };
+  function getCjsExportFromNamespace (n) {
+  	return n && n['default'] || n;
+  }
 
-	    var constructor = function () {
-	        var self = this,
-	            isInitialized = false,
-	            reportingService,
-	            eventQueue = [],
-	            settings = {},
-	            initUserAttributes = {},
-	            initUserIdentities = [];
+  var isobject$1 = getCjsExportFromNamespace(isobject);
 
-	        self.name = name;
+  /* eslint-disable no-undef */
 
-	        function initForwarder(forwarderSettings, service, testMode, trackerId, userAttributes, userIdentities) {
-	            reportingService = service;
-	            settings = forwarderSettings;
-	            initUserAttributes = userAttributes;
-	            initUserIdentities = userIdentities;
+  //
+  //  Copyright 2018 mParticle, Inc.
+  //
+  //  Licensed under the Apache License, Version 2.0 (the "License");
+  //  you may not use this file except in compliance with the License.
+  //  You may obtain a copy of the License at
+  //
+  //      http://www.apache.org/licenses/LICENSE-2.0
+  //
+  //  Unless required by applicable law or agreed to in writing, software
+  //  distributed under the License is distributed on an "AS IS" BASIS,
+  //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  //  See the License for the specific language governing permissions and
+  //  limitations under the License.
 
-	            try {
-	                if (!testMode && !window.Taplytics) {
-	                    var taplyticsScript = document.createElement('script');
-	                    taplyticsScript.type = 'text/javascript';
-	                    taplyticsScript.async = true;
-	                    taplyticsScript.src = getTaplyticsSourceLink();
-	                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(taplyticsScript);
-	                    taplyticsScript.onload = function() {
-	                        isInitialized = true;
+      
 
-	                        // On load, if the clientsdk exists and there are events
-	                        // in the eventQueue, process each event
-	                        if (window.Taplytics && eventQueue.length > 0) {
-	                            // Process any events that may have been queued up
-	                            // while forwarder was being initialized.
-	                            eventQueue.forEach(function(event) {
-	                                processEvent(event);
-	                            });
+      var name = 'Taplytics',
+          moduleId = 129,
+          MessageType = {
+              SessionStart: 1,
+              SessionEnd: 2,
+              PageView: 3,
+              PageEvent: 4,
+              CrashReport: 5,
+              OptOut: 6,
+              Commerce: 16
+          };
 
-	                            eventQueue = [];
-	                        }
-	                    };
-	                }
-	                else {
-	                    isInitialized = true;
-	                    if (testMode) {
-	                        Taplytics.src = getTaplyticsSourceLink();
-	                    }
-	                }
+      var constructor = function () {
+          var self = this,
+              isInitialized = false,
+              reportingService,
+              eventQueue = [],
+              settings = {},
+              initUserAttributes = {},
+              initUserIdentities = [];
 
-	                return 'Taplytics successfully loaded';
-	            }
-	            catch (e) {
-	                return 'Failed to initialize: ' + e;
-	            }
-	        }
+          self.name = name;
 
-	        /**
-	         * Called whenever an event occurs. Used to log different types of events.
-	         * @param event
-	         * @returns {string}
-	         */
-	        function processEvent(event) {
-	            var reportEvent = false;
-	            if (isInitialized) {
-	                try {
-	                    if (event.EventDataType === MessageType.PageView) {
-	                        reportEvent = logPageView(event);
-	                    } else if (event.EventDataType === MessageType.Commerce) {
-	                        if (event.EventCategory === mParticle.CommerceEventType.ProductPurchase) {
-	                            reportEvent = logPurchaseEvent(event);
-	                        } else {
-	                            reportEvent = logCommerceEvent(event);
-	                        }
-	                    } else if (event.EventDataType === MessageType.PageEvent) {
-	                        reportEvent = logEvent(event);
-	                    }
+          function initForwarder(forwarderSettings, service, testMode, trackerId, userAttributes, userIdentities) {
+              reportingService = service;
+              settings = forwarderSettings;
+              initUserAttributes = userAttributes;
+              initUserIdentities = userIdentities;
 
-	                    // leave the below alone
-	                    if (reportEvent === true && reportingService) {
-	                        reportingService(self, event);
-	                        return 'Successfully sent to ' + name;
-	                    } else {
-	                        return 'Error logging event or event type not supported - ' + reportEvent.error;
-	                    }
-	                }
-	                catch (e) {
-	                    return 'Failed to send to: ' + name + ' ' + e;
-	                }
-	            }
-	            else {
-	                eventQueue.push(event);
-	            }
+              try {
+                  if (!testMode && !window.Taplytics) {
+                      var taplyticsScript = document.createElement('script');
+                      taplyticsScript.type = 'text/javascript';
+                      taplyticsScript.async = true;
+                      taplyticsScript.src = getTaplyticsSourceLink();
+                      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(taplyticsScript);
+                      taplyticsScript.onload = function() {
+                          isInitialized = true;
 
-	            return 'Can\'t send to forwarder ' + name + ', not initialized. Event added to queue.';
-	        }
+                          // On load, if the clientsdk exists and there are events
+                          // in the eventQueue, process each event
+                          if (window.Taplytics && eventQueue.length > 0) {
+                              // Process any events that may have been queued up
+                              // while forwarder was being initialized.
+                              eventQueue.forEach(function(event) {
+                                  processEvent(event);
+                              });
 
-	        /**
-	         * Helper method to check if object is empty
-	         * @param obj
-	         * @returns {boolean}
-	         */
-	        function isEmpty(obj) {
-	            for (var prop in obj) { return false; }
-	            return true;
-	        }
+                              eventQueue = [];
+                          }
+                      };
+                  }
+                  else {
+                      isInitialized = true;
+                      if (testMode) {
+                          Taplytics.src = getTaplyticsSourceLink();
+                      }
+                  }
 
-	        /**
-	         * Helper method to merge obj 2 into obj1
-	         * @param obj1
-	         * @param obj2
-	         */
-	        function mergeObjects(obj1, obj2) {
-	            var obj = {};
-	            for (var key in obj1) {
-	                if (obj1[key]) {
-	                    obj[key] = obj1[key];
-	                }
-	            }
-	            for (var key in obj2) {
-	                if (obj2[key]) {
-	                    obj[key] = obj2[key];
-	                }
-	            }
-	            return obj;
-	        }
+                  return 'Taplytics successfully loaded';
+              }
+              catch (e) {
+                  return 'Failed to initialize: ' + e;
+              }
+          }
 
-	        /**
-	         * Helper method to clone an object
-	         * @param {*} obj 
-	         */
-	        function clone(obj) {
-	            var copy = {};
-	            for (var key in obj) {
-	              if (obj.hasOwnProperty(key)) {
-	                copy[key] = obj[key];
-	              }
-	            }
-	            return copy;
-	          }
+          /**
+           * Called whenever an event occurs. Used to log different types of events.
+           * @param event
+           * @returns {string}
+           */
+          function processEvent(event) {
+              var reportEvent = false;
+              if (isInitialized) {
+                  try {
+                      if (event.EventDataType === MessageType.PageView) {
+                          reportEvent = logPageView(event);
+                      } else if (event.EventDataType === MessageType.Commerce) {
+                          if (event.EventCategory === mParticle.CommerceEventType.ProductPurchase) {
+                              reportEvent = logPurchaseEvent(event);
+                          } else {
+                              reportEvent = logCommerceEvent(event);
+                          }
+                      } else if (event.EventDataType === MessageType.PageEvent) {
+                          reportEvent = logEvent(event);
+                      }
 
-	        /**
-	         * tracks Taplytics events 
-	         * @param {*} event 
-	         * @param {*} revenue 
-	         * @param {*} attributes 
-	         */
-	        function trackEvent(event, revenue, attributes) {
-	            if (revenue) {
-	                if (attributes && !isEmpty(attributes)) {
-	                    Taplytics.track(event, revenue, attributes);
-	                } else {
-	                    Taplytics.track(event, revenue);
-	                }
-	            } else {
-	                if (attributes && !isEmpty(attributes)) {
-	                    Taplytics.track(event, null, attributes);
-	                } else {
-	                    Taplytics.track(event);
-	                }
-	            }
-	        }
+                      // leave the below alone
+                      if (reportEvent === true && reportingService) {
+                          reportingService(self, event);
+                          return 'Successfully sent to ' + name;
+                      } else {
+                          return 'Error logging event or event type not supported - ' + reportEvent.error;
+                      }
+                  }
+                  catch (e) {
+                      return 'Failed to send to: ' + name + ' ' + e;
+                  }
+              }
+              else {
+                  eventQueue.push(event);
+              }
 
-	        /**
-	         * Construct Taplytics src link to load the SDK
-	         * @returns {string}
-	         */
-	        function getTaplyticsSourceLink() {
-	            var token = settings.apiKey;
-	            var cookieDomain = settings.taplyticsOptionCookieDomain;
-	            var timeout = settings.taplyticsOptionTimeout;
+              return 'Can\'t send to forwarder ' + name + ', not initialized. Event added to queue.';
+          }
 
-	            var src = 'https://js.taplytics.com/jssdk/' + token + '.min.js';
-	            var query = '';
+          /**
+           * Helper method to check if object is empty
+           * @param obj
+           * @returns {boolean}
+           */
+          function isEmpty(obj) {
+              for (var prop in obj) { return false; }
+              return true;
+          }
 
-	            if (timeout) {
-	                query = query + 'timeout=' + timeout;
-	            }
+          /**
+           * Helper method to merge obj 2 into obj1
+           * @param obj1
+           * @param obj2
+           */
+          function mergeObjects(obj1, obj2) {
+              var obj = {};
+              for (var key in obj1) {
+                  if (obj1[key]) {
+                      obj[key] = obj1[key];
+                  }
+              }
+              for (var key in obj2) {
+                  if (obj2[key]) {
+                      obj[key] = obj2[key];
+                  }
+              }
+              return obj;
+          }
 
-	            if (cookieDomain) {
-	                query = query + (query ? '&' : '') + 'cookieDomain=' + cookieDomain;
-	            }
+          /**
+           * Helper method to clone an object
+           * @param {*} obj 
+           */
+          function clone(obj) {
+              var copy = {};
+              for (var key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                  copy[key] = obj[key];
+                }
+              }
+              return copy;
+            }
 
-	            var userBucketing = settings.taplyticsOptionUserBucketing;
+          /**
+           * tracks Taplytics events 
+           * @param {*} event 
+           * @param {*} revenue 
+           * @param {*} attributes 
+           */
+          function trackEvent(event, revenue, attributes) {
+              if (revenue) {
+                  if (attributes && !isEmpty(attributes)) {
+                      Taplytics.track(event, revenue, attributes);
+                  } else {
+                      Taplytics.track(event, revenue);
+                  }
+              } else {
+                  if (attributes && !isEmpty(attributes)) {
+                      Taplytics.track(event, null, attributes);
+                  } else {
+                      Taplytics.track(event);
+                  }
+              }
+          }
 
-	            if (userBucketing === 'True') {
-	                query = query + (query ? '&' : '') + 'user_bucketing=true';
-	            }
+          /**
+           * Construct Taplytics src link to load the SDK
+           * @returns {string}
+           */
+          function getTaplyticsSourceLink() {
+              var token = settings.apiKey;
+              var cookieDomain = settings.taplyticsOptionCookieDomain;
+              var timeout = settings.taplyticsOptionTimeout;
 
-	            var user_attributes = initUserAttributes || {};
+              var src = 'https://js.taplytics.com/jssdk/' + token + '.min.js';
+              var query = '';
 
-	            if (initUserIdentities.length) {
-	                var identity = initUserIdentities[0];
-	                var type = identity.Type;
-	                var id = identity.Identity;
-	                switch (type) {
-	                    case 1:
-	                        user_attributes['user_id'] = id;
-	                        break;
-	                    case 7:
-	                        user_attributes['email'] = id;
-	                        break;
-	                }
-	            }
+              if (timeout) {
+                  query = query + 'timeout=' + timeout;
+              }
 
-	            if (!isEmpty(user_attributes)) {
-	                user_attributes = encodeURIComponent(JSON.stringify(user_attributes));
-	                query = query + (query ? '&' : '') + 'user_attributes' + user_attributes;
-	            }
+              if (cookieDomain) {
+                  query = query + (query ? '&' : '') + 'cookieDomain=' + cookieDomain;
+              }
 
-	            if (query) {
-	                src = src + '?' + query;
-	            }
+              var userBucketing = settings.taplyticsOptionUserBucketing;
 
-	            return src;
-	        }
+              if (userBucketing === 'True') {
+                  query = query + (query ? '&' : '') + 'user_bucketing=true';
+              }
 
-	        /**
-	         * Logs page view event to Taplytics
-	         * @param event
-	         * @returns {*}
-	         */
-	        function logPageView(event) {
-	            // Details on the `event` object schema in the README
-	            try {
-	                if (event.EventAttributes) {
-	                    Taplytics.page(event.EventName, event.EventAttributes);
-	                }
-	                else {
-	                    trackEvent(event.EventName);
-	                }
-	                return true;
-	            }
-	            catch (e) {
-	                return { error: e };
-	            }
-	        }
+              var user_attributes = initUserAttributes || {};
 
-	        /**
-	         * Logs purchase events as revenue events to Taplytics
-	         * @param event
-	         * @returns {*}
-	         */
-	        function logPurchaseEvent(event) {
-	            var reportEvent = false;
-	            if (event.ProductAction.ProductList) {
-	                try {
-	                    var productList = event.ProductAction.ProductList;
-	                    productList.forEach(function(product) {
-	                        var product = product;
-	                        var attributes = {};
-	                        var productAttributes = product;
-	                        if (product.Attributes) {
-	                            productAttributes = mergeObjects(product.Attributes, product);
-	                        }
+              if (initUserIdentities.length) {
+                  var identity = initUserIdentities[0];
+                  var type = identity.Type;
+                  var id = identity.Identity;
+                  switch (type) {
+                      case 1:
+                          user_attributes['user_id'] = id;
+                          break;
+                      case 7:
+                          user_attributes['email'] = id;
+                          break;
+                  }
+              }
 
-	                        if (event.EventAttributes) {
-	                            attributes['EventAttributes'] = event.EventAttributes;
-	                        }
+              if (!isEmpty(user_attributes)) {
+                  user_attributes = encodeURIComponent(JSON.stringify(user_attributes));
+                  query = query + (query ? '&' : '') + 'user_attributes' + user_attributes;
+              }
 
-	                        if (event.CurrencyCode) {
-	                            attributes['CurrencyCode'] = event.CurrencyCode;
-	                        }
+              if (query) {
+                  src = src + '?' + query;
+              }
 
-	                        attributes['ProductAttributes'] = productAttributes;
+              return src;
+          }
 
-	                        Taplytics.track(event.EventName, parseFloat(product.TotalAmount), attributes);
-	                    });
-	                    return true;
-	                }
-	                catch (e) {
-	                    return {error: e};
-	                }
-	            }
+          /**
+           * Logs page view event to Taplytics
+           * @param event
+           * @returns {*}
+           */
+          function logPageView(event) {
+              // Details on the `event` object schema in the README
+              try {
+                  if (event.EventAttributes) {
+                      Taplytics.page(event.EventName, event.EventAttributes);
+                  }
+                  else {
+                      trackEvent(event.EventName);
+                  }
+                  return true;
+              }
+              catch (e) {
+                  return { error: e };
+              }
+          }
 
-	            return reportEvent;
-	        }
+          /**
+           * Logs purchase events as revenue events to Taplytics
+           * @param event
+           * @returns {*}
+           */
+          function logPurchaseEvent(event) {
+              var reportEvent = false;
+              if (event.ProductAction.ProductList) {
+                  try {
+                      var productList = event.ProductAction.ProductList;
+                      productList.forEach(function(product) {
+                          var product = product;
+                          var attributes = {};
+                          var productAttributes = product;
+                          if (product.Attributes) {
+                              productAttributes = mergeObjects(product.Attributes, product);
+                          }
 
-	        /**
-	         * Logs all other commerce events as regular events with metadata to Taplytics
-	         * @param event
-	         * @returns {*}
-	         */
-	        function logCommerceEvent(event) {
-	            var reportEvent = false;
+                          if (event.EventAttributes) {
+                              attributes['EventAttributes'] = event.EventAttributes;
+                          }
 
-	            var attributes = {};
+                          if (event.CurrencyCode) {
+                              attributes['CurrencyCode'] = event.CurrencyCode;
+                          }
 
-	            if (event) {
-	                try {
-	                    if (event.EventAttributes) {
-	                        attributes['EventAttributes'] = event.EventAttributes;
-	                    }
+                          attributes['ProductAttributes'] = productAttributes;
 
-	                    if (event.CurrencyCode) {
-	                        attributes['CurrencyCode'] = event.CurrencyCode;
-	                    }
-	                    
-	                    if (event.EventCategory === mParticle.CommerceEventType.PromotionClick) {
-	                        var promotionList = event.PromotionAction.PromotionList;
-	                        if (promotionList) {
-	                            promotionList.forEach(function(promotion) {
-	                                attributes["Promotion"] = promotion;
-	                                trackEvent(event.EventName, null, attributes);
-	                            });
-	                        }
-	                    } else if (event.EventCategory === mParticle.CommerceEventType.ProductImpression) {
-	                        var impressions = event.ProductImpressions;
-	                        if (impressions) {
-	                            impressions.forEach(function(impression) {
-	                                var productList = impression.ProductList;
-	                                var impressionName = impression.ProductImpressionList;
-	                                if (productList) {
-	                                    productList.forEach(function(product) {
-	                                        var productAttributes = product;
-	                                        var attributeCopy = clone(attributes);
-	                                        if (product.Attributes) {
-	                                            productAttributes = mergeObjects(product, product.Attributes);
-	                                        }
-	    
-	                                        attributeCopy["ProductImpression"] = impressionName;
-	                                        attributeCopy["ProductImpressionProduct"] = productAttributes;
-	                                        trackEvent(event.EventName, null, attributeCopy);
-	                                    });
-	                                }
-	                            });
-	                        }
-	                    } else if (event.EventCategory === mParticle.CommerceEventType.ProductAddToCart ||
-	                        event.EventCategory === mParticle.CommerceEventType.ProductRemoveFromCart || 
-	                        event.ProductAction) {
+                          Taplytics.track(event.EventName, parseFloat(product.TotalAmount), attributes);
+                      });
+                      return true;
+                  }
+                  catch (e) {
+                      return {error: e};
+                  }
+              }
 
-	                        if (event.ProductAction.ProductList) {
-	                            var productList = event.ProductAction.ProductList;
-	                            productList.forEach(function(product) {
-	                                var productAttributes = product;
-	                                if (product.Attributes) {
-	                                    productAttributes = mergeObjects(product, product.Attributes);
-	                                }
-	                                attributes["ProductAttributes"] = productAttributes;
-	                                if (event.ShoppingCart && event.ShoppingCart.ProductList) {
-	                                    attributes["ShoppingCart"] = event.ShoppingCart.ProductList;
-	                                }
-	                                trackEvent(event.EventName, null, attributes);
-	                            });
-	                        }
-	                    } else {
-	                        trackEvent(event.EventName, null, attributes);
-	                    }
+              return reportEvent;
+          }
 
-	                    return true;
-	                }
-	                catch (e) {
-	                    return {error: e};
-	                }
-	            }
+          /**
+           * Logs all other commerce events as regular events with metadata to Taplytics
+           * @param event
+           * @returns {*}
+           */
+          function logCommerceEvent(event) {
+              var reportEvent = false;
 
-	            return reportEvent;
-			}
+              var attributes = {};
 
-	        /**
-	         * Log regular Taplytics events
-	         * @param {*} event 
-	         */
-	        function logEvent(event) {
-	            try {
-	                trackEvent(event.EventName, null, event.EventAttributes);
-	                return true;
-	            }
-	            catch (e) {
-	                return { error: e };
-	            }
-	        }
+              if (event) {
+                  try {
+                      if (event.EventAttributes) {
+                          attributes['EventAttributes'] = event.EventAttributes;
+                      }
 
-	        /**
-	         * Identifies user id or email with Taplytics
-	         * @param id
-	         * @param type
-	         * @returns {string}
-	         */
-	        function setUserIdentity(id, type) {
-	            if (isInitialized) {
-	                try {
-	                    // Some integrations have primary ids that they use
-	                    // (ie. CustomerId, or Email), you may have special methods
-	                    // to call for these. mParticle allows for several other
-	                    // types of userIds to be set. To view all user identity
-	                    // types, navigate to - https://github.com/mParticle/mparticle-sdk-javascript/blob/master-v2/src/types.js#L88-L101
-	                    if (type === window.mParticle.IdentityType.CustomerId) {
-	                        Taplytics.identify({
-	                            user_id: id
-	                        });
-	                    }
-	                    else if (type === window.mParticle.IdentityType.Email) {
-	                        Taplytics.identify({
-	                            email: id
-	                        });
-	                    }
-	                }
-	                catch (e) {
-	                    return 'Failed to call setUserIdentity on ' + name + ' ' + e;
-	                }
-	            }
-	            else {
-	                return 'Can\'t call setUserIdentity on forwarder ' + name + ', not initialized';
-	            }
-	        }
+                      if (event.CurrencyCode) {
+                          attributes['CurrencyCode'] = event.CurrencyCode;
+                      }
+                      
+                      if (event.EventCategory === mParticle.CommerceEventType.PromotionClick) {
+                          var promotionList = event.PromotionAction.PromotionList;
+                          if (promotionList) {
+                              promotionList.forEach(function(promotion) {
+                                  attributes["Promotion"] = promotion;
+                                  trackEvent(event.EventName, null, attributes);
+                              });
+                          }
+                      } else if (event.EventCategory === mParticle.CommerceEventType.ProductImpression) {
+                          var impressions = event.ProductImpressions;
+                          if (impressions) {
+                              impressions.forEach(function(impression) {
+                                  var productList = impression.ProductList;
+                                  var impressionName = impression.ProductImpressionList;
+                                  if (productList) {
+                                      productList.forEach(function(product) {
+                                          var productAttributes = product;
+                                          var attributeCopy = clone(attributes);
+                                          if (product.Attributes) {
+                                              productAttributes = mergeObjects(product, product.Attributes);
+                                          }
+      
+                                          attributeCopy["ProductImpression"] = impressionName;
+                                          attributeCopy["ProductImpressionProduct"] = productAttributes;
+                                          trackEvent(event.EventName, null, attributeCopy);
+                                      });
+                                  }
+                              });
+                          }
+                      } else if (event.EventCategory === mParticle.CommerceEventType.ProductAddToCart ||
+                          event.EventCategory === mParticle.CommerceEventType.ProductRemoveFromCart || 
+                          event.ProductAction) {
 
-	        /**
-	         * Sets user attributes to Taplytics
-	         * @param key
-	         * @param value
-	         * @returns {string}
-	         */
-	        function setUserAttribute(key, value) {
-	            if (isInitialized) {
-	                try {
-	                    var attributes = {};
-	                    attributes[key] = value;
-	                    Taplytics.identify(attributes);
-	                    return 'Successfully called setUserAttribute API on ' + name;
-	                }
-	                catch (e) {
-	                    return 'Failed to call SET setUserAttribute on ' + name + ' ' + e;
-	                }
-	            }
-	            else {
-	                return 'Can\'t call setUserAttribute on forwarder ' + name + ', not initialized';
-	            }
-	        }
+                          if (event.ProductAction.ProductList) {
+                              var productList = event.ProductAction.ProductList;
+                              productList.forEach(function(product) {
+                                  var productAttributes = product;
+                                  if (product.Attributes) {
+                                      productAttributes = mergeObjects(product, product.Attributes);
+                                  }
+                                  attributes["ProductAttributes"] = productAttributes;
+                                  if (event.ShoppingCart && event.ShoppingCart.ProductList) {
+                                      attributes["ShoppingCart"] = event.ShoppingCart.ProductList;
+                                  }
+                                  trackEvent(event.EventName, null, attributes);
+                              });
+                          }
+                      } else {
+                          trackEvent(event.EventName, null, attributes);
+                      }
 
-	        /** 
-	         * Remove user attribute by setting it to null
-	         * @param key
-	         */
-	        function removeUserAttribute(key) {
-	            setUserAttribute(key, null);
-	        }
+                      return true;
+                  }
+                  catch (e) {
+                      return {error: e};
+                  }
+              }
 
-	        /**
-	         * V2 version of setting user identity
-	         * @param user
-	         * @returns {string}
-	         */
-	        function onUserIdentified(user) {
-	            if (isInitialized) {
-	                var identities = user.getUserIdentities().userIdentities;
-	                var attributes = {};
-	                if (identities.customerid) {
-	                    attributes.user_id = identities.customerid;
-	                }
-	                if (identities.email) {
-	                    attributes.email = identities.email;
-	                }
-	                if (!isEmpty(attributes)) {
-	                    Taplytics.identify(attributes);
-	                }
-	            }
-	            else {
-	                return 'Can\'t call onUserIdentified on forwarder ' + name + ', not initialized';
-	            }
-	        }
+              return reportEvent;
+  		}
 
-	        this.init = initForwarder;
-	        this.process = processEvent;
-	        this.setUserIdentity = setUserIdentity;
-	        this.setUserAttribute = setUserAttribute;
-	        this.removeUserAttribute = removeUserAttribute;
-	        this.onUserIdentified = onUserIdentified;
-	    };
+          /**
+           * Log regular Taplytics events
+           * @param {*} event 
+           */
+          function logEvent(event) {
+              try {
+                  trackEvent(event.EventName, null, event.EventAttributes);
+                  return true;
+              }
+              catch (e) {
+                  return { error: e };
+              }
+          }
 
-	    function getId() {
-	        return moduleId;
-	    }
+          /**
+           * Identifies user id or email with Taplytics
+           * @param id
+           * @param type
+           * @returns {string}
+           */
+          function setUserIdentity(id, type) {
+              if (isInitialized) {
+                  try {
+                      // Some integrations have primary ids that they use
+                      // (ie. CustomerId, or Email), you may have special methods
+                      // to call for these. mParticle allows for several other
+                      // types of userIds to be set. To view all user identity
+                      // types, navigate to - https://github.com/mParticle/mparticle-sdk-javascript/blob/master-v2/src/types.js#L88-L101
+                      if (type === window.mParticle.IdentityType.CustomerId) {
+                          Taplytics.identify({
+                              user_id: id
+                          });
+                      }
+                      else if (type === window.mParticle.IdentityType.Email) {
+                          Taplytics.identify({
+                              email: id
+                          });
+                      }
+                  }
+                  catch (e) {
+                      return 'Failed to call setUserIdentity on ' + name + ' ' + e;
+                  }
+              }
+              else {
+                  return 'Can\'t call setUserIdentity on forwarder ' + name + ', not initialized';
+              }
+          }
 
-	    function register(config) {
-	        if (config.kits) {
-	            config.kits[name] = {
-	                constructor: constructor
-	            };
-	        }
-	    }
+          /**
+           * Sets user attributes to Taplytics
+           * @param key
+           * @param value
+           * @returns {string}
+           */
+          function setUserAttribute(key, value) {
+              if (isInitialized) {
+                  try {
+                      var attributes = {};
+                      attributes[key] = value;
+                      Taplytics.identify(attributes);
+                      return 'Successfully called setUserAttribute API on ' + name;
+                  }
+                  catch (e) {
+                      return 'Failed to call SET setUserAttribute on ' + name + ' ' + e;
+                  }
+              }
+              else {
+                  return 'Can\'t call setUserAttribute on forwarder ' + name + ', not initialized';
+              }
+          }
 
-	    if (!window || !window.mParticle || !window.mParticle.addForwarder) {
-	        return;
-	    }
+          /** 
+           * Remove user attribute by setting it to null
+           * @param key
+           */
+          function removeUserAttribute(key) {
+              setUserAttribute(key, null);
+          }
 
-	    window.mParticle.addForwarder({
-	        name: name,
-	        constructor: constructor,
-	        getId: getId
-	    });
+          /**
+           * V2 version of setting user identity
+           * @param user
+           * @returns {string}
+           */
+          function onUserIdentified(user) {
+              if (isInitialized) {
+                  var identities = user.getUserIdentities().userIdentities;
+                  var attributes = {};
+                  if (identities.customerid) {
+                      attributes.user_id = identities.customerid;
+                  }
+                  if (identities.email) {
+                      attributes.email = identities.email;
+                  }
+                  if (!isEmpty(attributes)) {
+                      Taplytics.identify(attributes);
+                  }
+              }
+              else {
+                  return 'Can\'t call onUserIdentified on forwarder ' + name + ', not initialized';
+              }
+          }
 
-	    module.exports = {
-	        register: register
-	    };
-	})(window);
-	});
-	var TaplyticsKit_1 = TaplyticsKit.register;
+          this.init = initForwarder;
+          this.process = processEvent;
+          this.setUserIdentity = setUserIdentity;
+          this.setUserAttribute = setUserAttribute;
+          this.removeUserAttribute = removeUserAttribute;
+          this.onUserIdentified = onUserIdentified;
+      };
 
-	exports.default = TaplyticsKit;
-	exports.register = TaplyticsKit_1;
+      function getId() {
+          return moduleId;
+      }
 
-	Object.defineProperty(exports, '__esModule', { value: true });
+      function register(config) {
+          if (!config) {
+              window.console.log('You must pass a config object to register the kit ' + name);
+              return;
+          }
 
-}));
+          if (!isobject$1(config)) {
+              window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
+              return;
+          }
+
+          if (isobject$1(config.kits)) {
+              config.kits[name] = {
+                  constructor: constructor
+              };
+          } else {
+              config.kits = {};
+              config.kits[name] = {
+                  constructor: constructor
+              };
+          }
+          window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
+      }
+
+      if (window && window.mParticle && window.mParticle.addForwarder) {
+          window.mParticle.addForwarder({
+              name: name,
+              constructor: constructor,
+              getId: getId
+          });
+      }
+      var TaplyticsKit = {
+          register: register
+      };
+  var TaplyticsKit_1 = TaplyticsKit.register;
+
+  exports.default = TaplyticsKit;
+  exports.register = TaplyticsKit_1;
+
+  return exports;
+
+}({}));
