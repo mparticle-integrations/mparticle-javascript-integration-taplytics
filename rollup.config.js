@@ -21,7 +21,7 @@ export default [
     {
         input: 'src/TaplyticsKit.js',
         output: {
-            file: 'dist/TaplyticsKit.js',
+            file: 'dist/TaplyticsKit.iife.js',
             format: 'iife',
             exports: 'named',
             name: 'mpTapylitcsKit',
@@ -37,7 +37,7 @@ export default [
     {
         input: 'src/TaplyticsKit.js',
         output: {
-            file: 'npm/TaplyticsKit.js',
+            file: 'npm/TaplyticsKit.common.js',
             format: 'cjs',
             exports: 'named',
             name: 'mpTapylitcsKit',

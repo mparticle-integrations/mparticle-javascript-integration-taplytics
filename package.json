@@ -3,9 +3,9 @@
   "version": "2.0.1-rc.1",
   "author": "mParticle Developers <developers@mparticle.com> (https://www.mparticle.com)",
   "description": "mParticle integration sdk for Taplytics",
-  "browser": "npm/TaplyticsKit.js",
+  "browser": "dist/TaplyticsKit.common.js",
   "files": [
-    "npm/TaplyticsKit.js"
+    "dist/TaplyticsKit.common.js"
   ],
   "repository": "https://github.com/mparticle-integrations/mparticle-javascript-integration-taplytics",
   "scripts": {
