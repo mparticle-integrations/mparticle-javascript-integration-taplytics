@@ -5,22 +5,6 @@ export default [
     {
         input: 'src/TaplyticsKit.js',
         output: {
-            file: 'TaplyticsKit.js',
-            format: 'iife',
-            exports: 'named',
-            name: 'mpTapylitcsKit',
-            strict: false
-        },
-        plugins: [
-            resolve({
-                browser: true
-            }),
-            commonjs()
-        ]
-    },
-    {
-        input: 'src/TaplyticsKit.js',
-        output: {
             file: 'dist/TaplyticsKit.iife.js',
             format: 'iife',
             exports: 'named',
