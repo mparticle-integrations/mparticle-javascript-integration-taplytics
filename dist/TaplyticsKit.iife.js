@@ -1,14 +1,13 @@
 var mpTapylitcsKit = (function (exports) {
-  /*!
-   * isobject <https://github.com/jonschlinkert/isobject>
-   *
-   * Copyright (c) 2014-2017, Jon Schlinkert.
-   * Released under the MIT License.
-   */
+  var toString = {}.toString;
 
-  function isObject(val) {
-    return val != null && typeof val === 'object' && Array.isArray(val) === false;
-  }
+  var isarray = Array.isArray || function (arr) {
+    return toString.call(arr) == '[object Array]';
+  };
+
+  var isobject = function isObject(val) {
+    return val != null && typeof val === 'object' && isarray(val) === false;
+  };
 
   /* eslint-disable no-undef */
 
@@ -245,7 +244,7 @@ var mpTapylitcsKit = (function (exports) {
 
               if (!isEmpty(user_attributes)) {
                   user_attributes = encodeURIComponent(JSON.stringify(user_attributes));
-                  query = query + (query ? '&' : '') + 'user_attributes' + user_attributes;
+                  query = query + (query ? '&' : '') + 'user_attributes=' + user_attributes;
               }
 
               if (query) {
@@ -514,16 +513,16 @@ var mpTapylitcsKit = (function (exports) {
 
       function register(config) {
           if (!config) {
-              window.console.log('You must pass a config object to register the kit ' + name);
+              console.log('You must pass a config object to register the kit ' + name);
               return;
           }
 
-          if (!isObject(config)) {
-              window.console.log('\'config\' must be an object. You passed in a ' + typeof config);
+          if (!isobject(config)) {
+              console.log('\'config\' must be an object. You passed in a ' + typeof config);
               return;
           }
 
-          if (isObject(config.kits)) {
+          if (isobject(config.kits)) {
               config.kits[name] = {
                   constructor: constructor
               };
@@ -533,16 +532,19 @@ var mpTapylitcsKit = (function (exports) {
                   constructor: constructor
               };
           }
-          window.console.log('Successfully registered ' + name + ' to your mParticle configuration');
+          console.log('Successfully registered ' + name + ' to your mParticle configuration');
       }
 
-      if (window && window.mParticle && window.mParticle.addForwarder) {
-          window.mParticle.addForwarder({
-              name: name,
-              constructor: constructor,
-              getId: getId
-          });
+      if (typeof window !== 'undefined') {
+          if (window && window.mParticle && window.mParticle.addForwarder) {
+              window.mParticle.addForwarder({
+                  name: name,
+                  constructor: constructor,
+                  getId: getId
+              });
+          }
       }
+
       var TaplyticsKit = {
           register: register
       };
