@@ -245,7 +245,7 @@ var mpTapylitcsKit = (function (exports) {
 
               if (!isEmpty(user_attributes)) {
                   user_attributes = encodeURIComponent(JSON.stringify(user_attributes));
-                  query = query + (query ? '&' : '') + 'user_attributes' + user_attributes;
+                  query = query + (query ? '&' : '') + 'user_attributes=' + user_attributes;
               }
 
               if (query) {
