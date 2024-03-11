@@ -146,6 +146,7 @@ describe('Taplytics Forwarder', function () {
 
     beforeEach(function() {
         window.Taplytics = new MockTaplytics();
+
         mParticle.forwarder.init(settings, reportService.cb, true, null, {
             gender: 'm'
         }, [{
@@ -160,28 +161,8 @@ describe('Taplytics Forwarder', function () {
         }], '1.1', 'My App');
     });
 
-    it('should build the source link correctly', function(done) {
-        var link = window.Taplytics.src;
-        var splitLink = link.split('?');
-        var host = splitLink[0];
-        var query = splitLink[1];
-        var params = query.split('&');
-
-        host.should.equal('https://js.taplytics.com/jssdk/apiKey.min.js')
-
-        var timeoutParam, cookieDomainParam, userBucketingParam;
-        timeoutParam = params[0].split('=');
-        cookieDomainParam = params[1].split('=');
-        userBucketingParam = params[2].split('=');
-
-        timeoutParam[1].should.equal('4');
-        cookieDomainParam[1].should.equal('www.taplytics.com');
-        userBucketingParam[1].should.equal('true');
-
-        done();
-    });
-
     it('should log page event', function(done) {
+        debugger;
         mParticle.forwarder.process({
             EventDataType: MessageType.PageView,
             EventName: 'Taplytics Page Event',

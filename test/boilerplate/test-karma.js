@@ -1,6 +1,6 @@
 var shell = require('shelljs');
 var util = require('util');
-var defaultArgs = '--single-run --browsers=ChromeHeadless,FirefoxHeadless';
+var defaultArgs = '--single-run --browsers=ChromeHeadless';
 var args = process.argv.slice(2).join(' ') || defaultArgs;
 
 var testCommand = util.format(

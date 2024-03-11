@@ -1,5 +1,5 @@
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 
 export default [
     {
@@ -9,14 +9,15 @@ export default [
             format: 'iife',
             exports: 'named',
             name: 'mpTapylitcsKit',
-            strict: false
+            strict: false,
+            inlineDynamicImports: true,
         },
         plugins: [
             resolve({
-                browser: true
+                browser: true,
             }),
-            commonjs()
-        ]
+            commonjs(),
+        ],
     },
     {
         input: 'src/TaplyticsKit.js',
@@ -25,13 +26,14 @@ export default [
             format: 'cjs',
             exports: 'named',
             name: 'mpTapylitcsKit',
-            strict: false
+            strict: false,
+            inlineDynamicImports: true,
         },
         plugins: [
             resolve({
-                browser: true
+                browser: true,
             }),
-            commonjs()
-        ]
-    }
-]
+            commonjs(),
+        ],
+    },
+];

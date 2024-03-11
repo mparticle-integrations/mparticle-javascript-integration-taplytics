@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
+import Taplytics from '@taplytics/js-sdk';
 
+window.Taplytics = Taplytics;
 //
 //  Copyright 2018 mParticle, Inc.
 //
@@ -14,8 +16,6 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
-
-    var isobject = require('isobject');
 
     var name = 'Taplytics',
         moduleId = 129,
@@ -47,34 +47,7 @@
             initUserIdentities = userIdentities;
 
             try {
-                if (!testMode && !window.Taplytics) {
-                    var taplyticsScript = document.createElement('script');
-                    taplyticsScript.type = 'text/javascript';
-                    taplyticsScript.async = true;
-                    taplyticsScript.src = getTaplyticsSourceLink();
-                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(taplyticsScript);
-                    taplyticsScript.onload = function() {
-                        isInitialized = true;
-
-                        // On load, if the clientsdk exists and there are events
-                        // in the eventQueue, process each event
-                        if (window.Taplytics && eventQueue.length > 0) {
-                            // Process any events that may have been queued up
-                            // while forwarder was being initialized.
-                            eventQueue.forEach(function(event) {
-                                processEvent(event);
-                            });
-
-                            eventQueue = [];
-                        }
-                    };
-                }
-                else {
-                    isInitialized = true;
-                    if (testMode) {
-                        Taplytics.src = getTaplyticsSourceLink();
-                    }
-                }
+                initializeTaplytics();
 
                 return 'Taplytics successfully loaded';
             }
@@ -191,29 +164,13 @@
 
         /**
          * Construct Taplytics src link to load the SDK
-         * @returns {string}
+         * @returns {*}
          */
-        function getTaplyticsSourceLink() {
+        function initializeTaplytics() {
             var token = settings.apiKey;
-            var cookieDomain = settings.taplyticsOptionCookieDomain;
+            var cookie_domain = settings.taplyticsOptionCookieDomain;
             var timeout = settings.taplyticsOptionTimeout;
-
-            var src = 'https://js.taplytics.com/jssdk/' + token + '.min.js';
-            var query = '';
-
-            if (timeout) {
-                query = query + 'timeout=' + timeout;
-            }
-
-            if (cookieDomain) {
-                query = query + (query ? '&' : '') + 'cookieDomain=' + cookieDomain;
-            }
-
-            var userBucketing = settings.taplyticsOptionUserBucketing;
-
-            if (userBucketing === 'True') {
-                query = query + (query ? '&' : '') + 'user_bucketing=true';
-            }
+            var user_bucketing = settings.taplyticsOptionuser_bucketing === 'True';
 
             var user_attributes = initUserAttributes || {};
 
@@ -233,14 +190,14 @@
 
             if (!isEmpty(user_attributes)) {
                 user_attributes = encodeURIComponent(JSON.stringify(user_attributes));
-                query = query + (query ? '&' : '') + 'user_attributes=' + user_attributes;
             }
 
-            if (query) {
-                src = src + '?' + query;
-            }
-
-            return src;
+            Taplytics.start(token, {
+                timeout,
+                cookie_domain,
+                user_bucketing,
+                user_attributes,
+            });
         }
 
         /**
@@ -506,12 +463,12 @@
             return;
         }
 
-        if (!isobject(config)) {
+        if (!isObject(config)) {
             console.log('\'config\' must be an object. You passed in a ' + typeof config);
             return;
         }
 
-        if (isobject(config.kits)) {
+        if (isObject(config.kits)) {
             config.kits[name] = {
                 constructor: constructor
             };
@@ -533,6 +490,15 @@
             });
         }
     }
+
+    function isObject(val) {
+        return (
+            val != null &&
+            typeof val === 'object' &&
+            Array.isArray(val) === false
+        );
+    }
+
 
     module.exports = {
         register: register

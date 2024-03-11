@@ -8,7 +8,7 @@
     <body>
         <div id="mocha"></div>
     
-        <script src="https://rawgit.com/mParticle/mparticle-sdk-javascript/master/mparticle.js"></script>
+        <script src="../node_modules/@mparticle/web-sdk/dist/mparticle.js"></script>
         <script src="../node_modules/mocha/mocha.js"></script>
         <script src="../node_modules/should/should.js"></script>
         <script src="mockhttprequest.js"></script>
@@ -17,7 +17,7 @@
                     window.mParticle.forwarder = new forwarder.constructor();
             };
         </script>
-        <script src="../TaplyticsKit.js" data-cover></script>
+        <script src="../dist/TaplyticsKit.iife.js" data-cover></script>
         <script>mocha.setup('bdd')</script>
         <script src="tests.js"></script>
         <script>
